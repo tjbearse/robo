@@ -28,3 +28,8 @@ type Configuration struct {
 	Location Coord
 	Heading Dir
 }
+
+type Player struct {
+	Name string
+	Robot *Robot
+}

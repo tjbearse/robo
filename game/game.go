@@ -12,7 +12,7 @@ const (
 
 type Game struct {
 	Board Board
-	// Players
+	Players []Player
 	// Cards
 	// Settings
 	Stage GameStage
@@ -34,6 +34,14 @@ func (g *Game) Run() {
 }
 
 func (g *Game) setupPhase() {
+	/*
+	State:
+		Player Ready State
+	Actions:
+	*/
+	// collect players
+
+	// Exit when All players are ready
 }
 
 func (g *Game) spawnPhase() {
