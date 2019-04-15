@@ -1,57 +1,49 @@
 package game
 
-
-type GameStage int
-// Stages of the game
-const (
-	Setup GameStage = iota
-	Spawn
-	SelectActions
-	Simulate
-)
+type GamePhase interface {}
 
 type Game struct {
-	Board Board
-	Players []Player
-	// Cards
+	board Board
+	players map[*Player]bool
+	Deck Deck
 	// Settings
-	Stage GameStage
+	phase GamePhase
 }
 
-func (g *Game) Run() {
-	for {
-		switch g.Stage {
-		case Setup:
-			g.setupPhase()
-		case Spawn:
-			g.spawnPhase()
-		case SelectActions:
-			g.selectActionsPhase()
-		case Simulate:
-			g.simulatePhase()
-		}
-	}
+func (g Game) GetPlayers() (map[*Player]bool) {
+	return g.players
+}
+func (g *Game) UpdatePlayers(players map[*Player]bool) {
+	g.players = players
+}
+func (g *Game) GetPhase() GamePhase {
+	return g.phase
+}
+func (g *Game) ChangePhase(ph GamePhase) {
+	g.phase = ph
+}
+func (g *Game) GetNextSpawn() (Configuration, error){
+	return g.board.getNextSpawn()
 }
 
-func (g *Game) setupPhase() {
-	/*
-	State:
-		Player Ready State
-	Actions:
-	*/
-	// collect players
-
-	// Exit when All players are ready
-}
-
-func (g *Game) spawnPhase() {
-}
-
-func (g *Game) selectActionsPhase() {
-}
-
-func (g *Game) simulatePhase() {
+//FIXME, a true type for this
+type Message string
+type PlayerMessage struct {
+	Player *Player
+	Message string
 }
 
 type Player struct {
+	Name string
+	Robot Robot
+	Spawn *Configuration
+}
+
+type Robot struct {
+	Name string
+	Damage int
+	Lives int
+	Board []*Card
+	Configuration *Configuration
+	// TODO stuck cards
 }
