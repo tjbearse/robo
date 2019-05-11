@@ -1,0 +1,42 @@
+* Phases
+** Add Players
+** Spawn
+To Players:
+- Prompt for spawn orientation
+- Notify robot spawned
+- Notify spawned object
+
+To Server:
+- Select spawn orientation
+** Play Cards
+To Players:
+- Deal cards
+- Update card placed
+- Update card picked up
+- Update timer state
+- Update player ready
+
+To Server:
+- Place card
+- Pick up card
+- Ready
+- Start timer
+
+** Siumulate
+To Players:
+- Move object (what: robot, hazard, flag) (how / why)
+- Flag captured (which and who)
+- Lazer fired / hazard fired
+- Damage taken
+- Player fell / died
+
+To Server:
+- Ready
+* Game state
+- Players: just names
+- Robots: player name
+- Robot Boards
+- Cards (deck, hands, boards)
+- Game board
+- Hazards
+- Flags

@@ -23,15 +23,6 @@ func (b *Board) getNextSpawn() (Configuration, error) {
 	return c, nil
 }
 
-// Dir describes the facing of an object
-type Dir int
-// Directions, values are in numerical order clockwise
-const (
-	North Dir = 0
-	East Dir = iota
-	South
-	West
-)
 
 type Coord struct {
 	X int

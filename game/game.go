@@ -10,6 +10,15 @@ type Game struct {
 	phase GamePhase
 }
 
+func NewGame(board Board, deck Deck, initialPhase GamePhase) Game {
+	return Game{
+		board,
+		map[*Player]bool{},
+		deck,
+		initialPhase,
+	}
+}
+
 func (g Game) GetPlayers() (map[*Player]bool) {
 	return g.players
 }
@@ -26,17 +35,22 @@ func (g *Game) GetNextSpawn() (Configuration, error){
 	return g.board.getNextSpawn()
 }
 
-//FIXME, a true type for this
-type Message string
-type PlayerMessage struct {
-	Player *Player
-	Message string
-}
-
 type Player struct {
 	Name string
-	Robot Robot
-	Spawn *Configuration
+	Robot *Robot
+	Spawn Spawn
+	// TODO hand?
+}
+
+type SpawnState int
+const (
+	Unset SpawnState = iota
+	Fixed
+	Rotatable
+)
+type Spawn struct {
+	State SpawnState
+	Config Configuration 
 }
 
 type Robot struct {

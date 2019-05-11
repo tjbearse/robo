@@ -4,28 +4,48 @@
 
 package websockets
 
+import (
+	"fmt"
+)
+
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
+
 type Hub struct {
 	// Registered clients.
 	clients map[*Client]bool
 
 	// Inbound messages from the clients.
-	broadcast chan []byte
+	inbound chan Envelope
 
 	// Register requests from the clients.
 	register chan *Client
 
 	// Unregister requests from clients.
 	unregister chan *Client
+
+	bridge Bridge
 }
 
-func newHub() *Hub {
+// make this a pump instead?
+type Bridge interface {
+	ActOnMessage(Envelope, func(Envelope))
+}
+
+type Envelope struct {
+	Client *Client
+	Msg []byte
+}
+
+
+// buffer this?
+func newHub(b Bridge) *Hub {
 	return &Hub{
-		broadcast:  make(chan []byte),
+		inbound:  make(chan Envelope),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
+		bridge: b,
 	}
 }
 
@@ -39,15 +59,30 @@ func (h *Hub) run() {
 				delete(h.clients, client)
 				close(client.send)
 			}
-		case message := <-h.broadcast:
-			for client := range h.clients {
-				select {
-				case client.send <- message:
-				default:
-					close(client.send)
-					delete(h.clients, client)
-				}
+		case message := <-h.inbound:
+			fmt.Printf("in: %s\n", message.Msg)
+			h.bridge.ActOnMessage(message, h.NonBlockingSend)
+		}
+	}
+}
+
+func (h *Hub) NonBlockingSend(e Envelope) {
+	fmt.Printf("out: %s\n", e.Msg)
+	if e.Client == nil {
+		for client := range h.clients {
+			select {
+			case client.send <- e.Msg:
+			default:
+				close(client.send)
+				delete(h.clients, client)
 			}
+		}
+	} else {
+		select {
+		case e.Client.send <- e.Msg:
+		default:
+			close(e.Client.send)
+			delete(h.clients, e.Client)
 		}
 	}
 }

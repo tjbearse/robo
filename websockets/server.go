@@ -33,8 +33,8 @@ func init() {
 	box = packr.NewBox("./templates")
 }
 
-func (s *server) Serve() {
-	hub := newHub()
+func (s *server) Serve(b Bridge) {
+	hub := newHub(b)
 	go hub.run()
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {

@@ -2,21 +2,51 @@ package events
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/tjbearse/robo/game"
 )
 
-func NewPlayCardsPhase (g *game.Game) PlayCardsPhase {
+func StartCardsPhase (c commClient, g *game.Game) {
 	hands := map[*game.Player][]game.Card{}
 	players := g.GetPlayers()
 	for p := range(players) {
 		if p.Robot.Lives > 0 {
-			hands[p] = g.Deck.Deal(HandSize - p.Robot.Damage)
-			// TODO prompt with hand
-			// FIXME move hands into player objects?, i.e. update player
+			cards := g.Deck.Deal(HandSize - p.Robot.Damage)
+			hands[p] = cards
+			prompt := PromptWithHand{hands[p]}
+			c.Message(prompt, p)
 		}
 	}
-	return PlayCardsPhase{hands, map[*game.Player]bool{}}
+	newPh := PlayCardsPhase{hands, map[*game.Player]bool{}}
+	g.ChangePhase(&newPh)
+}
+
+type PromptWithHand struct {
+	Cards []game.Card
+}
+func (PromptWithHand) GetType() string {
+	return "PromptWithHand"
+}
+
+type NotifyCardToBoard struct {
+	BoardSlot uint
+	HandOffset uint
+	Card game.Card
+}
+type NotifyCardToHand struct {
+	BoardSlot uint
+	HandOffset uint
+	Card game.Card
+}
+
+type NotifyCardToBoardBlind struct {
+	Player string
+	BoardSlot uint
+}
+type NotifyCardToHandBlind struct {
+	Player string
+	BoardSlot uint
 }
 
 
@@ -25,59 +55,77 @@ type PlayCardsPhase struct {
 	Ready map[*game.Player]bool
 	// TODO: Timer chan bool
 }
-	// State:
-	// cards in player hand
-	// cards committed
-	// timer state
 
-	// Actions:
-	// start timer
-	// add selection
-	// unset selection
-	// ready/submit
-	// (out) cancelled by timer, random vals
-
-	// GOTO
-	// simulatePhase when all spawned
-
-func AddSelection(g *game.Game, p *game.Player, c int, slot int) Event {
-	return func () error {
-		uPhase := g.GetPhase()
-		ph, ok := uPhase.(PlayCardsPhase)
-		if !ok {
-			return errors.New("Not the right phase")
-		}
-		hand := ph.Hands[p]
-		// check above ^
-		if c > len(hand) {
-			return errors.New("card out of range")
-		}
-		card := hand[c]
-		if slot > len(p.Robot.Board) {
-			return errors.New("slot out of range")
-		}
-		if p.Robot.Board[slot] != nil {
-			return errors.New("slot not free")
-		}
-		// FIXME use the update pattern
-		p.Robot.Board[slot] = &card
-		ph.Hands[p] = append(hand[:c], hand[c+1:]...)
-		// TODO updated robot board and hand
-		return nil
+type CardToBoard struct {
+	HandOffset uint
+	BoardSlot uint
+}
+func (e CardToBoard) Exec(c commClient, g *game.Game) error {
+	p, err := getPlayer(c)
+	if err != nil {
+		return err
 	}
+
+	uPhase := g.GetPhase()
+	ph, ok := uPhase.(*PlayCardsPhase)
+	if !ok {
+		return errors.New("Not the right phase")
+	}
+
+	hand := ph.Hands[p]
+	co := e.HandOffset
+	if int(co) > len(hand) {
+		return fmt.Errorf("card out of range: %d", co)
+	}
+	card := hand[co]
+
+	slot := e.BoardSlot
+	if int(slot) >= len(p.Robot.Board) {
+		return fmt.Errorf("slot out of range: %d", slot)
+	}
+	if p.Robot.Board[slot] != nil {
+		return fmt.Errorf("slot not free: %d", slot)
+	}
+
+	p.Robot.Board[slot] = &card
+	hand = append(hand[:co], hand[co+1:]...)
+	ph.Hands[p] = hand
+
+	c.Broadcast(NotifyCardToBoardBlind{p.Name, slot})
+	c.Message(NotifyCardToBoard{slot, co, card}, p)
+	return nil
 }
 
-// TODO convert to event style
-func (ph *PlayCardsPhase) removeSelection(g *game.Game, p *game.Player, slot int) {
+type CardToHand struct {
+	BoardSlot uint
+}
+func (e CardToHand) Exec(c commClient, g *game.Game) error {
+	p, err := getPlayer(c)
+	if err != nil {
+		return err
+	}
+
+	uPhase := g.GetPhase()
+	ph, ok := uPhase.(*PlayCardsPhase)
+	if !ok {
+		return errors.New("Not the right phase")
+	}
+
+	slot := e.BoardSlot
+	if int(slot) > len(p.Robot.Board) {
+		return fmt.Errorf("slot out of range: %d", slot)
+	} else if p.Robot.Board[slot] == nil {
+		return fmt.Errorf("slot not occupied: %d", slot)
+	} else if int(slot) > (HandSize - p.Robot.Damage) {
+		return fmt.Errorf("slot locked: %d", slot)
+	}
 	hand := ph.Hands[p]
-	// TODO check above ^
-	if slot > len(p.Robot.Board) {
-		// TODO swat: slot out of range
-	}
-	if p.Robot.Board[slot] == nil {
-		// TODO swat: slot not free
-	}
-	ph.Hands[p] = append(hand, *p.Robot.Board[slot])
+	co := uint(len(hand))
+	card := *p.Robot.Board[slot]
+	ph.Hands[p] = append(hand, card)
 	p.Robot.Board[slot] = nil
-	// TODO update player board and hand updated
+
+	c.Broadcast(NotifyCardToHandBlind{p.Name, slot})
+	c.Message(NotifyCardToHand{slot, co, card}, p)
+	return nil
 }

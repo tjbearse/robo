@@ -5,7 +5,8 @@
 <script type="text/javascript">
 window.onload = function () {
     var conn;
-    var msg = document.getElementById("msg");
+    var msg = document.getElementById("Msg");
+    var type = document.getElementById("Type");
     var log = document.getElementById("log");
 
     function appendLog(item) {
@@ -23,9 +24,22 @@ window.onload = function () {
         if (!msg.value) {
             return false;
         }
-        conn.send(msg.value);
-        msg.value = "";
-        return false;
+        if (!type.value) {
+            return false;
+        }
+		try {
+			var msgV = JSON.parse(msg.value)
+			var envelope = {
+				Type: type.value,
+				Msg: msgV
+			};
+			conn.send(JSON.stringify(envelope));
+			msg.value = "";
+			type.value = "";
+			return false;
+		} catch {
+			return false;
+		}
     };
 
     if (window["WebSocket"]) {
@@ -38,8 +52,9 @@ window.onload = function () {
         conn.onmessage = function (evt) {
             var messages = evt.data.split('\n');
             for (var i = 0; i < messages.length; i++) {
-                var item = document.createElement("div");
-                item.innerText = messages[i];
+                var item = document.createElement("pre");
+				var txt = JSON.stringify(JSON.parse(messages[i]), null, 4)
+                item.innerText = txt;
                 appendLog(item);
             }
         };
@@ -91,8 +106,11 @@ body {
 <body>
 <div id="log"></div>
 <form id="form">
+    <input type="text" id="Type" size="64"/>
+	</br>
+    <input type="text" id="Msg" size="64"/>
+	</br>
     <input type="submit" value="Send" />
-    <input type="text" id="msg" size="64"/>
 </form>
 </body>
 </html>
