@@ -10,10 +10,19 @@ type Dir int
 // Directions, values are in numerical order clockwise
 const (
 	North Dir = 0
-	East Dir = iota
-	South
-	West
+	East Dir = 1
+	South Dir = 2
+	West Dir = 3
 )
+
+func (d Dir) RotateRight(n int) Dir {
+	nDir := 4
+	i := int(d)
+	i = (i + n) % nDir
+	// this could be negative now
+	i = (i + nDir) % nDir
+	return Dir(i)
+}
 
 func (d Dir) String() string {
 	return toString[d]

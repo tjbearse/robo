@@ -8,13 +8,6 @@ import (
 
 type AddPlayerPhase struct {}
 
-type AddPlayer struct {
-	Name string
-}
-func (AddPlayer) GetType() string {
-	return "AddPlayer"
-}
-
 type JoinGame struct {
 	Name string
 }
@@ -33,11 +26,11 @@ func (j JoinGame) Exec(c commClient, g *game.Game) error {
 
 	board := make([]*game.Card, Steps)
 	r := game.Robot{name, 0, RobotMaxLives, board, nil}
-	p := game.Player{name, &r, game.Spawn{}}
+	p := game.Player{name, r, game.Spawn{}, 0}
 	players[&p] = true
 	g.UpdatePlayers(players)
 	c.Associate(&p)
-	c.Broadcast(AddPlayer{name})
+	c.Broadcast(NotifyAddPlayer{name})
 	return nil
 }
 
@@ -51,11 +44,8 @@ func (e LeaveGame) Exec(c commClient, g *game.Game) error {
 	delete(players, p)
 	g.UpdatePlayers(players)
 	c.Deassociate()
-	c.Broadcast(RemovePlayer{p.Name})
+	c.Broadcast(NotifyRemovePlayer{p.Name})
 	return nil
-}
-type RemovePlayer struct {
-	Name string
 }
 
 type ReadyToSpawn struct {}

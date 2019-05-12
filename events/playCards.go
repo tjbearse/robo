@@ -7,6 +7,8 @@ import (
 	"github.com/tjbearse/robo/game"
 )
 
+
+// TODO there is an option to power down instead of receiving cards
 func StartCardsPhase (c commClient, g *game.Game) {
 	hands := map[*game.Player][]game.Card{}
 	players := g.GetPlayers()
@@ -22,44 +24,18 @@ func StartCardsPhase (c commClient, g *game.Game) {
 	g.ChangePhase(&newPh)
 }
 
-type PromptWithHand struct {
-	Cards []game.Card
-}
-func (PromptWithHand) GetType() string {
-	return "PromptWithHand"
-}
-
-type NotifyCardToBoard struct {
-	BoardSlot uint
-	HandOffset uint
-	Card game.Card
-}
-type NotifyCardToHand struct {
-	BoardSlot uint
-	HandOffset uint
-	Card game.Card
-}
-
-type NotifyCardToBoardBlind struct {
-	Player string
-	BoardSlot uint
-}
-type NotifyCardToHandBlind struct {
-	Player string
-	BoardSlot uint
-}
-
-
 type PlayCardsPhase struct {
 	Hands map[*game.Player][]game.Card
 	Ready map[*game.Player]bool
 	// TODO: Timer chan bool
 }
 
+
 type CardToBoard struct {
 	HandOffset uint
 	BoardSlot uint
 }
+
 func (e CardToBoard) Exec(c commClient, g *game.Game) error {
 	p, err := getPlayer(c)
 	if err != nil {
@@ -108,6 +84,7 @@ func (e CardToHand) Exec(c commClient, g *game.Game) error {
 	uPhase := g.GetPhase()
 	ph, ok := uPhase.(*PlayCardsPhase)
 	if !ok {
+		// TODO abstract this repetitive error message
 		return errors.New("Not the right phase")
 	}
 
@@ -127,5 +104,34 @@ func (e CardToHand) Exec(c commClient, g *game.Game) error {
 
 	c.Broadcast(NotifyCardToHandBlind{p.Name, slot})
 	c.Message(NotifyCardToHand{slot, co, card}, p)
+	return nil
+}
+
+type CommitCards struct {}
+func (e CommitCards) Exec(c commClient, g *game.Game) error {
+	p, err := getPlayer(c)
+	if err != nil {
+		return err
+	}
+
+	uPhase := g.GetPhase()
+	ph, ok := uPhase.(*PlayCardsPhase)
+	if !ok {
+		return errors.New("Not the right phase")
+	}
+	// TODO check if hand full
+	if ph.Ready[p] == true {
+		return errors.New("Already ready")
+	}
+	ph.Ready[p] = true
+	c.Broadcast(NotifyPlayerReady{p.Name})
+
+	for _, ready := range(ph.Ready) {
+		if !ready {
+			return nil
+		}
+	}
+	// all ready
+	StartSimulationPhase(c,g)
 	return nil
 }

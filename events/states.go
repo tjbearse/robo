@@ -6,17 +6,12 @@ import (
 	"github.com/tjbearse/robo/game"
 )
 
-const RobotMaxLives = 3
-const HandSize = 8
-const Steps = 5
+// TODO rm this file once game logic removed
 
-type IncomingEvent interface {
-	Exec(commClient, *game.Game) error
-}
 
-type OutGoingEvent interface {}
-
-type Event func() error
+const RobotMaxLives int = 3
+const HandSize int = 8
+const Steps int = 5
 
 type commClient interface {
 	Broadcast(OutGoingEvent)
@@ -28,6 +23,7 @@ type commClient interface {
 	GetPlayer() *game.Player
 }
 
+// TODO get rid of this fn? Just share an error message if player is nil
 func getPlayer(c commClient) (*game.Player, error) {
 	p := c.GetPlayer()
 	if p == nil {

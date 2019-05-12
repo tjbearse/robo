@@ -3,7 +3,7 @@ package game
 type GamePhase interface {}
 
 type Game struct {
-	board Board
+	Board Board
 	players map[*Player]bool
 	Deck Deck
 	// Settings
@@ -32,25 +32,23 @@ func (g *Game) ChangePhase(ph GamePhase) {
 	g.phase = ph
 }
 func (g *Game) GetNextSpawn() (Configuration, error){
-	return g.board.getNextSpawn()
+	return g.Board.getNextSpawn()
+}
+
+func (g *Game) CheckForRobot(c Coord) *Robot {
+	for p, _ := range(g.players) {
+		if p.Robot.Configuration != nil && p.Robot.Configuration.Location == c {
+			return &p.Robot
+		}
+	}
+	return nil
 }
 
 type Player struct {
 	Name string
-	Robot *Robot
+	Robot Robot
 	Spawn Spawn
-	// TODO hand?
-}
-
-type SpawnState int
-const (
-	Unset SpawnState = iota
-	Fixed
-	Rotatable
-)
-type Spawn struct {
-	State SpawnState
-	Config Configuration 
+	FlagNum int // i.e. the flag currently targetting
 }
 
 type Robot struct {
@@ -59,5 +57,14 @@ type Robot struct {
 	Lives int
 	Board []*Card
 	Configuration *Configuration
-	// TODO stuck cards
+}
+
+type SpawnState int
+const (
+	Unset SpawnState = iota
+	Rotatable
+)
+type Spawn struct {
+	State SpawnState
+	Coord Coord
 }

@@ -9,17 +9,8 @@ type Deck struct {
 	pos int
 }
 
-func NewDeck() Deck {
-	return Deck{
-		[]Card{
-			{ 1, Forward, 1},
-			{ 2, Forward, 2},
-			{ 3, TurnLeft, 1},
-			{ 4, TurnRight, 1},
-			{ 5, Backward, 1},
-		},
-		0,
-	}
+func NewDeck(c []Card) *Deck {
+	return &Deck{c, 0}
 }
 
 func (d *Deck) Deal(n int) ([]Card) {
@@ -43,8 +34,44 @@ const (
 	TurnRight
 	UTurn
 )
+/* Ideas for expansion
+N,E,S,W commands
+Strafe commands
+*/
+
 type Card struct {
 	Priority int
 	Command Command
 	Reps int
+}
+
+// CardCompare is for sorting
+func CardCompare(a,b Card) bool {
+	return a.Priority < b.Priority
+}
+
+func (card Card) Apply(c Configuration) []Configuration {
+	steps := make([]Configuration, 0)
+	switch card.Command {
+		case Forward:
+			for i := 0; i < card.Reps; i++ {
+				c = c.ApplyDirectionaly(Offset{0, 1})
+				steps = append(steps, c)
+			}
+		case Backward:
+			for i := 0; i < card.Reps; i++ {
+				c = c.ApplyDirectionaly(Offset{0, -1})
+				steps = append(steps, c)
+			}
+		case TurnLeft:
+			c.Heading = c.Heading.RotateRight(-1)
+			steps = append(steps, c)
+		case TurnRight:
+			c.Heading = c.Heading.RotateRight(1)
+			steps = append(steps, c)
+		case UTurn:
+			c.Heading = c.Heading.RotateRight(2)
+			steps = append(steps, c)
+	}
+	return steps
 }

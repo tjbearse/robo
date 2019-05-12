@@ -10,11 +10,6 @@ type SpawnPhase struct {
 	waiting map[*game.Player]bool
 }
 
-type NotifyStartSpawn struct {}
-func (NotifyStartSpawn) GetType() string {
-	return "NotifyStartSpawn"
-}
-
 func StartSpawnPhase(c commClient, g *game.Game) {
 	c.Broadcast(NotifyStartSpawn{})
 
@@ -22,19 +17,18 @@ func StartSpawnPhase(c commClient, g *game.Game) {
 	for p := range(g.GetPlayers()) {
 		// who is not on the board?
 		if p.Robot.Configuration == nil {
+			// FIXME all spawns after the first get 2 damage
 			switch p.Spawn.State {
 			case game.Unset:
 				config, err := g.GetNextSpawn()
 				if err != nil {
 					// TODO tell everyone that everything is bad
 				}
-				p.Spawn.State = game.Fixed
-				p.Spawn.Config = config
-				spawn(c, p.Robot, config)
-			case game.Fixed:
-				spawn(c, p.Robot, p.Spawn.Config)
+				p.Spawn.State = game.Rotatable
+				p.Spawn.Coord = config.Location
+				spawn(c, &p.Robot, config)
 			case game.Rotatable:
-				loc := p.Spawn.Config.Location
+				loc := p.Spawn.Coord
 				prompt := PromptForSpawn{p.Robot.Name, loc}
 				c.Message(prompt, p)
 				selecting[p] = false
@@ -49,24 +43,9 @@ func StartSpawnPhase(c commClient, g *game.Game) {
 	}
 }
 
-// Outgoing
-type PromptForSpawn struct {
-	Robot string
-	Location game.Coord
-}
-func (PromptForSpawn) GetType() string {
-	return "PromptForSpawn"
-}
-
-func spawn(comm commClient, r *game.Robot, c game.Configuration) {
-	r.Configuration = &c
-	comm.Broadcast(NotifyRobotMoved{r.Name, Spawned, game.Configuration{}, c})
-}
-
 type SetSpawnHeading struct {
 	Dir game.Dir
 }
-
 func (e SetSpawnHeading) Exec(c commClient, g *game.Game) error {
 	p, err := getPlayer(c)
 	if err != nil {
@@ -83,9 +62,8 @@ func (e SetSpawnHeading) Exec(c commClient, g *game.Game) error {
 		return errors.New("We didn't ask for a spawn at this time")
 	}
 	delete(ph.waiting, p)
-	config := p.Spawn.Config
-	config.Heading = e.Dir
-	spawn(c, p.Robot, config)
+	config := game.Configuration{p.Spawn.Coord, e.Dir}
+	spawn(c, &p.Robot, config)
 
 	if len(ph.waiting) != 0 {
 		return nil
@@ -93,4 +71,9 @@ func (e SetSpawnHeading) Exec(c commClient, g *game.Game) error {
 
 	StartCardsPhase(c, g)
 	return nil
+}
+
+func spawn(comm commClient, r *game.Robot, c game.Configuration) {
+	r.Configuration = &c
+	comm.Broadcast(NotifyRobotMoved{r.Name, Spawned, game.Configuration{}, c})
 }

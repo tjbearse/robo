@@ -24,6 +24,7 @@ To Server:
 
 ** Siumulate
 To Players:
+- Notify cards
 - Move object (what: robot, hazard, flag) (how / why)
 - Flag captured (which and who)
 - Lazer fired / hazard fired
@@ -31,7 +32,7 @@ To Players:
 - Player fell / died
 
 To Server:
-- Ready
+- Ready (?)
 * Game state
 - Players: just names
 - Robots: player name

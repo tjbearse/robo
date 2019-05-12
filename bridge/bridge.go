@@ -82,6 +82,7 @@ var eventMap = map[string]reflect.Type {
 	"SetSpawnHeading": reflect.TypeOf(events.SetSpawnHeading{}),
 	"CardToBoard": reflect.TypeOf(events.CardToBoard{}),
 	"CardToHand": reflect.TypeOf(events.CardToHand{}),
+	"CommitCards": reflect.TypeOf(events.CommitCards{}),
 }
 
 // decide which context we have before this point
@@ -93,7 +94,6 @@ func unpackIncomingEvent(b []byte) (events.IncomingEvent, error) {
 	}
 	if err := json.Unmarshal(b, &env); err != nil {
 		return nil, errors.New("Couldn't unpack message")
-		// TODO tell client to stop doing that
 	}
 
 	t, ok := eventMap[env.Type]
