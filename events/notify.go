@@ -76,6 +76,7 @@ type NotifyCardToBoardBlind struct {
 	Player string
 	BoardSlot uint
 }
+
 type NotifyCardToHandBlind struct {
 	Player string
 	BoardSlot uint
