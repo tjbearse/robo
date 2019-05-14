@@ -5,17 +5,19 @@ import (
 	"fmt"
 
 	"github.com/tjbearse/robo/game"
+	"github.com/tjbearse/robo/game/cards"
 )
 
 
 // TODO there is an option to power down instead of receiving cards
 func StartCardsPhase (c commClient, g *game.Game) {
-	hands := map[*game.Player][]game.Card{}
+	hands := map[*game.Player][]cards.Card{}
 	players := g.GetPlayers()
 	for p := range(players) {
 		if p.Robot.Lives > 0 {
 			cards := g.Deck.Deal(HandSize - p.Robot.Damage)
 			hands[p] = cards
+			// TODO add info for num cards of others?
 			prompt := PromptWithHand{hands[p]}
 			c.Message(prompt, p)
 		}
@@ -25,7 +27,7 @@ func StartCardsPhase (c commClient, g *game.Game) {
 }
 
 type PlayCardsPhase struct {
-	Hands map[*game.Player][]game.Card
+	Hands map[*game.Player][]cards.Card
 	Ready map[*game.Player]bool
 	// TODO: Timer chan bool
 }

@@ -4,6 +4,8 @@ import (
 	"sort"
 
 	"github.com/tjbearse/robo/game"
+	"github.com/tjbearse/robo/game/cards"
+	"github.com/tjbearse/robo/game/coords"
 )
 
 func StartSimulationPhase(c commClient, g *game.Game) {
@@ -24,7 +26,7 @@ func runTurn(c commClient, g *game.Game) {
 
 type commandPair struct {
 	Player *game.Player
-	Card game.Card
+	Card cards.Card
 }
 
 func runRegister(c commClient, g *game.Game, reg int) {
@@ -53,7 +55,7 @@ func flipCards(g *game.Game, round int) []commandPair {
 			commands = append(commands, commandPair{p, card})
 		}
 	}
-	sort.Slice(commands, func (i, j int) bool { return game.CardCompare(commands[i].Card, commands[j].Card) })
+	sort.Slice(commands, func (i, j int) bool { return cards.CardCompare(commands[i].Card, commands[j].Card) })
 	return commands
 }
 
@@ -69,11 +71,11 @@ func resolveMove(c commClient, g *game.Game, cp commandPair) {
 		// Rotations always succeed
 		if desiredMove.Location == previous.Location {
 			if desiredMove.Heading != previous.Heading {
-				c.Broadcast(NotifyRobotMoved{p.Robot.Name, Moved, previous, desiredMove})
+				c.Broadcast(NotifyRobotMoved{p.Name, Moved, previous, desiredMove})
 				*p.Robot.Configuration = desiredMove
 			}
 		}
-		attemptMove(c, g, desiredMove.Location, &p.Robot, Moved)
+		attemptMove(c, g, desiredMove.Location, p, Moved)
 		if p.Robot.Configuration == nil {
 			return
 		}
@@ -81,13 +83,14 @@ func resolveMove(c commClient, g *game.Game, cp commandPair) {
 }
 
 // TODO should these events be collected together? Perhaps return those instead
-func attemptMove(c commClient, g *game.Game, loc game.Coord, r *game.Robot, reason MoveReason) (success bool) {
+func attemptMove(c commClient, g *game.Game, loc coords.Coord, p *game.Player, reason MoveReason) (success bool) {
+	r := &p.Robot
 	if r.Configuration == nil {
 		return false
 	}
-	target := game.Configuration{loc, r.Configuration.Heading}
+	target := coords.Configuration{loc, r.Configuration.Heading}
 	if !g.Board.IsInbounds(loc) {
-		robotFalls(c, r, target, reason)
+		robotFalls(c, p, target, reason)
 		return true
 	}
 	// FIXME ignored error
@@ -98,22 +101,22 @@ func attemptMove(c commClient, g *game.Game, loc game.Coord, r *game.Robot, reas
 
 	tile, _ := g.Board.GetTile(loc)
 	if tile.Type == game.Pit {
-		robotFalls(c, r, target, reason)
+		robotFalls(c, p, target, reason)
 		return true
 	}
-	collideRobot := g.CheckForRobot(loc)
-	if collideRobot != nil {
+	collidePlayer := g.CheckForRobot(loc)
+	if collidePlayer != nil {
 		prev := r.Configuration.Location
 		// Note this only works as long as offset steps are small (Len 1)
 		collisionOffset := prev.OffsetTo(loc)
 		collisionLoc := loc.Apply(collisionOffset)
-		possible := attemptMove(c, g, collisionLoc, collideRobot, Bumped)
+		possible := attemptMove(c, g, collisionLoc, collidePlayer, Bumped)
 		if !possible {
 			return false
 		}
 	}
 	// moveThere
-	c.Broadcast(NotifyRobotMoved{r.Name, reason, *r.Configuration, target})
+	c.Broadcast(NotifyRobotMoved{p.Name, reason, *r.Configuration, target})
 	*r.Configuration = target
 	return true
 }
@@ -177,8 +180,9 @@ func cleanup(c commClient, g *game.Game) {
 	// Wiping Registers
 }
 
-func robotFalls(c commClient, r *game.Robot, target game.Configuration, reason MoveReason) {
+func robotFalls(c commClient, p *game.Player, target coords.Configuration, reason MoveReason) {
+	r := &p.Robot
 	r.Lives--
-	c.Broadcast(NotifyRobotFell{r.Name, reason, *r.Configuration, target})
+	c.Broadcast(NotifyRobotFell{p.Name, reason, *r.Configuration, target})
 	r.Configuration = nil
 }

@@ -1,17 +1,30 @@
+import store from "./store"
 
-window.onload = function () {
-    var conn;
+console.log(store.getState())
+const unsubscribe = store.subscribe(() => console.log(store.getState()))
+window.onload = windowOnLoad
+var conn;
+window.sendEvent = sendEvent
+
+// --
+
+function dispatchAction(wsFormat) {
+	let action = {
+		type: wsFormat.Type,
+		payload: wsFormat.Msg
+	}
+	store.dispatch(action)
+}
+
+function sendEvent(Type, Msg) {
+	conn.send(JSON.stringify({ Type, Msg }));
+}
+
+function windowOnLoad() {
     var msg = document.getElementById("Msg");
     var type = document.getElementById("Type");
     var log = document.getElementById("log");
 
-    function appendLog(item) {
-        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-        log.appendChild(item);
-        if (doScroll) {
-            log.scrollTop = log.scrollHeight - log.clientHeight;
-        }
-    }
 
     document.getElementById("form").onsubmit = function () {
         if (!conn) {
@@ -48,8 +61,10 @@ window.onload = function () {
         conn.onmessage = function (evt) {
             var messages = evt.data.split('\n');
             for (var i = 0; i < messages.length; i++) {
+				var json = JSON.parse(messages[i])
+				dispatchAction(json)
+				var txt = JSON.stringify(json, null, 4)
                 var item = document.createElement("pre");
-				var txt = JSON.stringify(JSON.parse(messages[i]), null, 4)
                 item.innerText = txt;
                 appendLog(item);
             }
@@ -59,4 +74,15 @@ window.onload = function () {
         item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
         appendLog(item);
     }
+	return
+	// --
+
+    function appendLog(item) {
+        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+        log.appendChild(item);
+        if (doScroll) {
+            log.scrollTop = log.scrollHeight - log.clientHeight;
+        }
+    }
 };
+

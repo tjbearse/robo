@@ -1,0 +1,9 @@
+{
+	"compilerOptions": {
+		"outDir": "./dist/",
+		"module": "es6",
+		"lib": ["es2018"],
+		"sourceMap": true,
+		"allowJs": true
+	}
+}

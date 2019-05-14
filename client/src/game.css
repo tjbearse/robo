@@ -1,5 +1,6 @@
 html {
     overflow: hidden;
+	height: 100%
 }
 
 body {
@@ -11,6 +12,12 @@ body {
     background: gray;
 }
 
+#messages {
+	width: 80%;
+	height: 100%;
+	position: relative;
+	float: left;
+}
 #log {
     background: white;
     margin: 0;

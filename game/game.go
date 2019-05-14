@@ -1,16 +1,21 @@
 package game
 
+import (
+	"github.com/tjbearse/robo/game/cards"
+	"github.com/tjbearse/robo/game/coords"
+)
+
 type GamePhase interface {}
 
 type Game struct {
 	Board Board
 	players map[*Player]bool
-	Deck Deck
+	Deck cards.Deck
 	// Settings
 	phase GamePhase
 }
 
-func NewGame(board Board, deck Deck, initialPhase GamePhase) Game {
+func NewGame(board Board, deck cards.Deck, initialPhase GamePhase) Game {
 	return Game{
 		board,
 		map[*Player]bool{},
@@ -31,19 +36,20 @@ func (g *Game) GetPhase() GamePhase {
 func (g *Game) ChangePhase(ph GamePhase) {
 	g.phase = ph
 }
-func (g *Game) GetNextSpawn() (Configuration, error){
+func (g *Game) GetNextSpawn() (coords.Configuration, error){
 	return g.Board.getNextSpawn()
 }
 
-func (g *Game) CheckForRobot(c Coord) *Robot {
+func (g *Game) CheckForRobot(c coords.Coord) *Player {
 	for p, _ := range(g.players) {
 		if p.Robot.Configuration != nil && p.Robot.Configuration.Location == c {
-			return &p.Robot
+			return p
 		}
 	}
 	return nil
 }
 
+// TODO collapse player and Robot?
 type Player struct {
 	Name string
 	Robot Robot
@@ -52,11 +58,10 @@ type Player struct {
 }
 
 type Robot struct {
-	Name string
 	Damage int
 	Lives int
-	Board []*Card
-	Configuration *Configuration
+	Board []*cards.Card
+	Configuration *coords.Configuration
 }
 
 type SpawnState int
@@ -66,5 +71,5 @@ const (
 )
 type Spawn struct {
 	State SpawnState
-	Coord Coord
+	Coord coords.Coord
 }

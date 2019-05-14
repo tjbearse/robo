@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tjbearse/robo/game"
+	"github.com/tjbearse/robo/game/cards"
 )
 
 type AddPlayerPhase struct {}
@@ -24,13 +25,15 @@ func (j JoinGame) Exec(c commClient, g *game.Game) error {
 		}
 	}
 
-	board := make([]*game.Card, Steps)
-	r := game.Robot{name, 0, RobotMaxLives, board, nil}
+	board := make([]*cards.Card, Steps)
+	r := game.Robot{0, RobotMaxLives, board, nil}
 	p := game.Player{name, r, game.Spawn{}, 0}
 	players[&p] = true
 	g.UpdatePlayers(players)
 	c.Associate(&p)
+	c.Message(NotifyWelcome{name}, &p)
 	c.Broadcast(NotifyAddPlayer{name})
+	// TODO fill in the player on what the current game state is (existing players at least)
 	return nil
 }
 
@@ -50,6 +53,16 @@ func (e LeaveGame) Exec(c commClient, g *game.Game) error {
 
 type ReadyToSpawn struct {}
 func (ReadyToSpawn) Exec(c commClient, g *game.Game) error {
+	/*
+	// TODO there should be a phase check here but the phase isn't initialized properly
+	uPhase := g.GetPhase()
+	_, ok := uPhase.(*AddPlayerPhase)
+	_, ok2 := uPhase.(*SimulationPhase)
+	if !ok && !ok2 {
+		return errors.New("Not the right phase")
+	}
+	*/
+
 	StartSpawnPhase(c, g)
 	return nil
 }

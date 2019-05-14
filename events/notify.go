@@ -1,7 +1,8 @@
 package events
 
 import (
-	"github.com/tjbearse/robo/game"
+	"github.com/tjbearse/robo/game/coords"
+	"github.com/tjbearse/robo/game/cards"
 )
 
 // Events that notify the players of happenings
@@ -11,6 +12,9 @@ type NotifyRemovePlayer struct {
 }
 
 type NotifyAddPlayer struct {
+	Name string
+}
+type NotifyWelcome struct {
 	Name string
 }
 
@@ -26,8 +30,8 @@ const (
 type NotifyRobotMoved struct {
 	Name string
 	Reason MoveReason
-	OldConfig game.Configuration
-	NewConfig game.Configuration
+	OldConfig coords.Configuration
+	NewConfig coords.Configuration
 }
 
 // FIXME clarity between robot and player names
@@ -35,18 +39,18 @@ type NotifyRobotMoved struct {
 type NotifyRobotFell struct {
 	Name string
 	Reason MoveReason
-	OldConfig game.Configuration
-	Target game.Configuration
+	OldConfig coords.Configuration
+	Target coords.Configuration
 }
 
 type NotifyRevealCard struct {
 	Name string
-	Card game.Card
+	Card cards.Card
 }
 
 type NotifySpawnUpdate struct {
 	Name string
-	Coord game.Coord
+	Coord coords.Coord
 }
 
 type NotifyFlagTouched struct {
@@ -63,13 +67,13 @@ type NotifyStartSpawn struct {}
 type NotifyCardToBoard struct {
 	BoardSlot uint
 	HandOffset uint
-	Card game.Card
+	Card cards.Card
 }
 
 type NotifyCardToHand struct {
 	BoardSlot uint
 	HandOffset uint
-	Card game.Card
+	Card cards.Card
 }
 
 type NotifyCardToBoardBlind struct {
@@ -82,6 +86,7 @@ type NotifyCardToHandBlind struct {
 	BoardSlot uint
 }
 
+// FIXME too generic
 type NotifyPlayerReady struct {
 	Name string
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/tjbearse/robo/game"
+	"github.com/tjbearse/robo/game/coords"
 )
 
 type SpawnPhase struct {
@@ -26,10 +27,11 @@ func StartSpawnPhase(c commClient, g *game.Game) {
 				}
 				p.Spawn.State = game.Rotatable
 				p.Spawn.Coord = config.Location
-				spawn(c, &p.Robot, config)
+				c.Broadcast(NotifySpawnUpdate{p.Name, config.Location})
+				spawn(c, p, config)
 			case game.Rotatable:
 				loc := p.Spawn.Coord
-				prompt := PromptForSpawn{p.Robot.Name, loc}
+				prompt := PromptForSpawn{p.Name, loc}
 				c.Message(prompt, p)
 				selecting[p] = false
 			}
@@ -44,7 +46,7 @@ func StartSpawnPhase(c commClient, g *game.Game) {
 }
 
 type SetSpawnHeading struct {
-	Dir game.Dir
+	Dir coords.Dir
 }
 func (e SetSpawnHeading) Exec(c commClient, g *game.Game) error {
 	p, err := getPlayer(c)
@@ -62,8 +64,8 @@ func (e SetSpawnHeading) Exec(c commClient, g *game.Game) error {
 		return errors.New("We didn't ask for a spawn at this time")
 	}
 	delete(ph.waiting, p)
-	config := game.Configuration{p.Spawn.Coord, e.Dir}
-	spawn(c, &p.Robot, config)
+	config := coords.Configuration{p.Spawn.Coord, e.Dir}
+	spawn(c, p, config)
 
 	if len(ph.waiting) != 0 {
 		return nil
@@ -73,7 +75,8 @@ func (e SetSpawnHeading) Exec(c commClient, g *game.Game) error {
 	return nil
 }
 
-func spawn(comm commClient, r *game.Robot, c game.Configuration) {
+func spawn(comm commClient, p *game.Player, c coords.Configuration) {
+	r := &p.Robot
 	r.Configuration = &c
-	comm.Broadcast(NotifyRobotMoved{r.Name, Spawned, game.Configuration{}, c})
+	comm.Broadcast(NotifyRobotMoved{p.Name, Spawned, coords.Configuration{}, c})
 }

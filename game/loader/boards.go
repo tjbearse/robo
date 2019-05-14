@@ -2,6 +2,7 @@ package loader
 
 import (
 	. "github.com/tjbearse/robo/game"
+	. "github.com/tjbearse/robo/game/coords"
 )
 
 

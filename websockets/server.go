@@ -32,9 +32,9 @@ var startTime = time.Now()
 
 func init() {
 	if usePackr {
-		fs = packr.NewBox("./templates")
+		fs = packr.NewBox("../client/dist")
 	} else {
-		fs = http.Dir("./websockets/templates")
+		fs = http.Dir("./client/dist")
 	}
 }
 

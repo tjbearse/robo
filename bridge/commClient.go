@@ -3,6 +3,7 @@ package bridge
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 	
 	"github.com/tjbearse/robo/events"
 	"github.com/tjbearse/robo/game"
@@ -26,9 +27,13 @@ func (c *commClient) Message(raw events.OutGoingEvent, p *game.Player) {
 }
 
 func (c *commClient) sendTo(raw events.OutGoingEvent, cl *websockets.Client) {
+	// FIXME this is hacky, do this properly
+	t := reflect.TypeOf(raw).String()
+	parts := strings.Split(t, ".")
+	t = parts[len(parts) -1]
 	env := Envelope{
 		Msg: raw,
-		Type: reflect.TypeOf(raw).String(),
+		Type: t,
 	}
 	msg, _ := json.Marshal(env)
 	c.send(websockets.Envelope{cl, msg})
