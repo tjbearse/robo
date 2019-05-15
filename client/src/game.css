@@ -36,11 +36,32 @@ body {
 	height: 50px;
 	padding: 0;
 	border: 1px solid grey;
+	position: relative;
 }
-/* TODO repeat */
-#board td.wall-North {
-	border-top: 3px solid blue;
+
+#board td .wall {
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	border-width: 8px;
+	border-color: grey;
+	box-sizing: border-box;
 }
+#board td .wall-North {
+	border-top-style: solid
+}
+#board td .wall-East {
+	border-right-style: solid
+}
+#board td .wall-South {
+	border-bottom-style: solid
+}
+#board td .wall-West {
+	border-left-style: solid;
+}
+
 #board td.tile-Floor {
 	background: url(./sprites.svg) 0 0;
 }

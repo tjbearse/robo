@@ -5,6 +5,8 @@ import (
 	. "github.com/tjbearse/robo/game/coords"
 )
 
+// TODO build a serializer here and copy some of the known board
+// would also need a way to select in create game
 
 func GetDefaultBoard() (*Board, error) {
 	width, height := 10, 10
@@ -27,6 +29,8 @@ func GetDefaultBoard() (*Board, error) {
 	for x := 0; x < len(pb.Nwalls); x++ {
 		pb.Nwalls[x] = make([]bool, height+1)
 	}
+	pb.Nwalls[3][4] = true
+	pb.Wwalls[8][2] = true
 
 	pb.Tiles[2][4].Type = Flag
 	pb.FlagOrder = []Coord{{2,4}}

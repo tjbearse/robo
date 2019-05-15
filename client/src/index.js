@@ -83,9 +83,14 @@ function drawCrappyVersion(state) {
 								acc += 'wall-' + Walls[w] + ' '
 							}
 							return acc
-						}, ' ')
-					cell.className = wallClass + ' tile tile-' + TileType[tile.type] +
+						}, '')
+					cell.className = 'tile tile-' + TileType[tile.type] +
 						' dir-' + tile.dir
+					if (wallClass) {
+						let wall = document.createElement('div')
+						wall.className = 'wall ' + wallClass
+						cell.appendChild(wall)
+					}
 				}
 				if (coords[x] && coords[x][y]) {
 					let player = coords[x][y]
