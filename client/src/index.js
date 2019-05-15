@@ -1,4 +1,6 @@
 import store from "./store"
+import {Walls, TileType} from "./types/board"
+import './game.css'
 
 // This file is mostly temporary stuff while I work on data store
 
@@ -32,7 +34,37 @@ function drawCrappyVersion(state) {
 	// --
 
 	function drawCrappyBoard(board, players){
-		let eBoard = document.createElement('div')
+		let eBoard = document.createElement('table')
+		eBoard.id = 'board'
+		if (board.length == 0) {
+			return eBoard
+		}
+		/*
+		     x -->
+		   y
+		   |
+		   v
+		*/
+		for (let y=0; y<board[0].length; y++) {
+			let row = document.createElement('tr')
+			for (let x=0; x<board.length; x++) {
+				let cell = document.createElement('td')
+				// TODO
+				let tile = board[x][y]
+				let wallClass = [Walls.North, Walls.East, Walls.South, Walls.West]
+					.reduce((acc, w) => {
+						if (tile & w) {
+							acc += 'wall-' + Walls[w] + ' '
+						}
+						return acc
+					}, ' ')
+				cell.className = wallClass + ' tile tile-' + TileType[tile.type] +
+					' dir-' + tile.dir
+				row.appendChild(cell)
+			}
+			eBoard.appendChild(row)
+		}
+
 		return eBoard
 	}
 	function drawMyHandAndBoard(){

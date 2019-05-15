@@ -26,10 +26,48 @@ body {
 
 #board {
 	background: white;
+	border-collapse: collapse;
+}
+#board td {
+	width: 50px;
+	height: 50px;
+	padding: 0;
+	border: 1px solid grey;
+}
+/* TODO repeat */
+#board td.wall-North {
+	border-top: 3px solid blue;
+}
+#board td.tile-Floor {
+	background: url(./sprites.svg) 0 0;
+}
+#board td.tile-Pit {
+	background: url(./sprites.svg) -50px 0;
+}
+#board td.tile-Repair {
+	background: url(./sprites.svg) -100px 0;
+}
+#board td.tile-Upgrade {
+	background: url(./sprites.svg) -150px 0;
+}
+#board td.tile-Flag {
+	background: url(./sprites.svg) 0px -50px;
+}
+#board td.tile-Conveyor {
+	background: url(./sprites.svg) -50px -50px;
+}
+#board td.tile-ExpressConveyor {
+	background: url(./sprites.svg) -100px -50px;
+}
+#board td.tile-Pusher {
+	background: url(./sprites.svg) -150px -50px;
+}
+#board td.tile-Laser {
+	background: url(./sprites.svg) -0px -100px;
 }
 
 #log {
-    background: white;
+	background: white;
     margin: 0;
     padding: 0.5em 0.5em 0.5em 0.5em;
     position: absolute;
