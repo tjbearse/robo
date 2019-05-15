@@ -9,6 +9,7 @@ export interface Config {
 }
 
 export enum Dir {
+	Indeterminent = "",
 	North = "North",
 	East = "East",
 	South = "South",

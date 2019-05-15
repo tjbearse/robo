@@ -2,6 +2,7 @@ import { createReducer } from 'redux-starter-kit'
 
 import notify from '../actions/notify'
 import {Player, newPlayer} from '../types/player'
+import {Dir} from '../types/coord'
 
 /*
   me: string(name) | null
@@ -31,12 +32,22 @@ const playersReducer = createReducer(
 		...onPlayer({
 			[notify.SpawnUpdate]: (p:Player, {Coord}) => { p.spawn = Coord },
 
-			[notify.RobotMoved]: (p:Player, {NewConfig}) => { p.robot = NewConfig },
+			[notify.PromptForSpawn]: (p:Player, {Coord}) => {
+				p.robot.config = { Location: Coord, Heading: Dir.Indeterminent }
+			},
+			[notify.RobotMoved]: (p:Player, {NewConfig}) => { p.robot.config = NewConfig },
+			[notify.RobotFell]: (p:Player, { Target }) => { p.robot.config = Target },
 
+			[notify.Cleanup]: (p:Player, { Board }) => {
+				p.board = {}
+				Board.forEach((c, i) => {
+					if (c) {
+						p.board[i] = c
+					}
+				})
+			},
 			/*
 			  FlagTouched = 'NotifyFlagTouched',
-			  RobotFell = 'NotifyRobotFell',
-			  RobotMoved = 'NotifyRobotMoved',
 
 			  PlayerReady = 'NotifyPlayerReady',
 
@@ -79,7 +90,7 @@ function onPlayer(reducers: {[s: string]: (Player, payload) => any} ) {
 	function selectToPlayer(fn: (p:Player, payload) => any) {
 		return function(state, payload) {
 			let {me, players} = state
-			const name = payload.Name
+			const name = payload.Player
 			const player = players[name]
 			fn(player, payload) // must modify in place
 		}

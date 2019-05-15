@@ -182,8 +182,24 @@ func touchCheckpoints(c comm.ExtendedCommClient, g *game.Game) {
 }
 
 func cleanup(c comm.ExtendedCommClient, g *game.Game) {
-	// Repairs & Upgrades
+	// TODO Repairs & Upgrades
+
 	// Wiping Registers
+	players := g.GetPlayers()
+	for p := range(players) {
+		unlockedNum := HandSize - p.Robot.Damage
+		if unlockedNum > Steps {
+			unlockedNum = Steps
+		}
+		for i:= 0; i < unlockedNum; i++ {
+			card := p.Robot.Board[i] 
+			if card != nil {
+				g.Deck.Discard(*card)
+				p.Robot.Board[i] = nil
+			}
+		}
+		c.Broadcast(g, NotifyCleanup{p.Name, p.Robot.Board})
+	}
 }
 
 func executeRobotFall(p *game.Player, target coords.Configuration, reason MoveReason) NotifyRobotFell {

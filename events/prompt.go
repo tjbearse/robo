@@ -9,8 +9,8 @@ import (
 // TODO consolidate into notify?
 
 type PromptForSpawn struct {
-	Robot string
-	Location coords.Coord
+	Player string
+	Coord coords.Coord
 }
 
 type PromptWithHand struct {

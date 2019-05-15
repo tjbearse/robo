@@ -9,7 +9,13 @@ const unsubscribe = store.subscribe(() => console.log(store.getState()))
 
 window.onload = windowOnLoad
 var conn;
-window.sendEvent = sendEvent
+// crappy player api :)
+Object.assign(window, {
+	sendEvent,
+	sendCard,
+	retrieveCard,
+	setSpawn,
+})
 
 // --
 
@@ -25,7 +31,9 @@ function drawCrappyVersion(state) {
 	e.id = 'gameArea'
 	
 	e.appendChild(drawCrappyBoard(board, players))
-	e.appendChild(drawMyHandAndBoard(myPlayer))
+	if (myPlayer) {
+		e.appendChild(drawMyHandAndBoard(myPlayer))
+	}
 
 	let old = document.getElementById('gameArea')
 	old.parentNode.replaceChild(e, old);
@@ -39,27 +47,53 @@ function drawCrappyVersion(state) {
 		if (board.length == 0) {
 			return eBoard
 		}
+		let coords = Object.values(players).reduce(( acc, player ) => {
+			if (player.robot.config) {
+				acc.push(player)
+			}
+			return acc
+		}, []).reduce(( acc, player ) => {
+			let robot = player.robot
+			let {X, Y} = robot.config.Location
+			if (!acc[X]) {
+				acc[X] = {}
+			}
+			acc[X][Y] = player
+			return acc
+		}, {})
 		/*
 		     x -->
 		   y
 		   |
 		   v
 		*/
-		for (let y=0; y<board[0].length; y++) {
+		for (let y=-1; y<board[0].length+1; y++) {
 			let row = document.createElement('tr')
-			for (let x=0; x<board.length; x++) {
+			for (let x=-1; x<board.length+1; x++) {
 				let cell = document.createElement('td')
-				// TODO
-				let tile = board[x][y]
-				let wallClass = [Walls.North, Walls.East, Walls.South, Walls.West]
-					.reduce((acc, w) => {
-						if (tile & w) {
-							acc += 'wall-' + Walls[w] + ' '
-						}
-						return acc
-					}, ' ')
-				cell.className = wallClass + ' tile tile-' + TileType[tile.type] +
-					' dir-' + tile.dir
+				if (x < 0 || x >= board.length || y < 0 || y >= board[0].length) {
+					// Off map
+					cell.className = 'tile tile-OffMap'
+				} else {
+					// Real map
+					let tile = board[x][y]
+					let wallClass = [Walls.North, Walls.East, Walls.South, Walls.West]
+						.reduce((acc, w) => {
+							if (tile.walls & w) {
+								acc += 'wall-' + Walls[w] + ' '
+							}
+							return acc
+						}, ' ')
+					cell.className = wallClass + ' tile tile-' + TileType[tile.type] +
+						' dir-' + tile.dir
+				}
+				if (coords[x] && coords[x][y]) {
+					let player = coords[x][y]
+					let eRobot = document.createElement('div')
+					eRobot.className = 'robot dir-'+(player.robot.config.Heading || 'indeterminent')
+					// TODO differentiate players
+					cell.appendChild(eRobot)
+				}
 				row.appendChild(cell)
 			}
 			eBoard.appendChild(row)
@@ -67,9 +101,51 @@ function drawCrappyVersion(state) {
 
 		return eBoard
 	}
-	function drawMyHandAndBoard(){
-		return document.createElement('div')
+
+	function drawMyHandAndBoard(myPlayer){
+		let ePlayArea = document.createElement('div')
+		ePlayArea.id = 'playArea'
+
+		// hand
+		let eHand = document.createElement('ol')
+		eHand.id = 'hand'
+		eHand.start = '0'
+		myPlayer.hand.forEach((card) => {
+			let eCard = getCard(card)
+			eHand.appendChild(eCard)
+		})
+		let heading = document.createElement('div')
+		heading.innerText = 'Hand'
+		heading.appendChild(eHand)
+		ePlayArea.appendChild(heading)
+
+		// robot board
+		let eBoard = document.createElement('ol')
+		eBoard.id = 'robot-board'
+		for (let i=0; i < 5; i++) {
+			let eSlot;
+			if (myPlayer.board[i]) {
+				eSlot = getCard(myPlayer.board[i])
+			} else {
+				eSlot = document.createElement('li')
+			}
+			eBoard.appendChild(eSlot)
+		}
+		heading = document.createElement('div')
+		heading.innerText = 'Board'
+		heading.appendChild(eBoard)
+		ePlayArea.appendChild(heading)
+
+		return ePlayArea
+
+		function getCard(c) {
+			let eCard = document.createElement('li')
+			eCard.className = 'card'
+			eCard.innerText = JSON.stringify(Object.values(c))
+			return eCard
+		}
 	}
+
 }
 
 function dispatchAction(wsFormat) {
@@ -82,6 +158,27 @@ function dispatchAction(wsFormat) {
 
 function sendEvent(Type, Msg) {
 	conn.send(JSON.stringify({ Type, Msg }));
+}
+function sendCard() {
+	let HandOffset = +document.getElementById('cardslot').value
+	let BoardSlot = +document.getElementById('boardslot').value
+	sendEvent('CardToBoard', {
+		HandOffset,
+		BoardSlot,
+	})
+}
+function retrieveCard() {
+	let HandOffset = +document.getElementById('cardslot').value
+	let BoardSlot = +document.getElementById('boardslot').value
+	sendEvent('CardToHand', {
+		HandOffset,
+		BoardSlot,
+	})
+}
+function setSpawn() {
+	var e = document.getElementById("spawnHeading");
+	var heading = e.options[e.selectedIndex].text;
+	sendEvent('SetSpawnHeading', { 'Dir': heading })
 }
 
 function windowOnLoad() {

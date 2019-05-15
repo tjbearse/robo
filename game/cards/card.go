@@ -33,6 +33,9 @@ func (d *Deck) Shuffle() {
 	d.pos = 0
 }
 
+func (d *Deck) Discard(c Card) {
+}
+
 
 /* Ideas for expansion
 N,E,S,W commands

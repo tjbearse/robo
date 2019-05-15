@@ -131,6 +131,9 @@ func (e CommitCards) Exec(cc comm.CommClient) error {
 	}
 	ph.Ready[p] = true
 	c.Broadcast(g, NotifyPlayerReady{p.Name})
+	for _, card := range(ph.Hands[p]) {
+		g.Deck.Discard(card)
+	}
 
 	for _, ready := range(ph.Ready) {
 		if !ready {

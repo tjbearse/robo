@@ -22,4 +22,4 @@ var wrongPhaseError = errors.New("Not the right phase")
 
 const RobotMaxLives int = 3
 const HandSize int = 8
-const Steps int = 5
+const Steps int = 5 //FIXME bad name, register count

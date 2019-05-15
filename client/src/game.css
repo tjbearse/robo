@@ -1,10 +1,8 @@
 html {
-    overflow: hidden;
 	height: 100%
 }
 
 body {
-    overflow: hidden;
     padding: 0;
     margin: 0;
     width: 100%;
@@ -23,10 +21,15 @@ body {
 	height: 100%;
 	float: left;
 }
+#playArea {
+	margin: 8px;
+	float: left;
+}
 
 #board {
 	background: white;
 	border-collapse: collapse;
+	float:left;
 }
 #board td {
 	width: 50px;
@@ -53,6 +56,7 @@ body {
 #board td.tile-Flag {
 	background: url(./sprites.svg) 0px -50px;
 }
+/* curved belts? */
 #board td.tile-Conveyor {
 	background: url(./sprites.svg) -50px -50px;
 }
@@ -64,6 +68,43 @@ body {
 }
 #board td.tile-Laser {
 	background: url(./sprites.svg) -0px -100px;
+}
+#board td.tile-Laser {
+	background: url(./sprites.svg) -0px -100px;
+}
+#board td.tile-OffMap {
+	background: #222;
+}
+
+.dir-North {}
+.dir-East {
+	transform: rotate(90deg);
+}
+.dir-West {
+	transform: rotate(270deg);
+}
+.dir-South {
+	transform: rotate(180deg);
+}
+.dir-indeterminent {
+	transform: rotate(180deg);
+	animation-name: spin;
+	animation-duration: 4s;
+	animation-iteration-count: infinite;
+}
+/* The animation code */
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	25% { transform: rotate(90deg); }
+	50% { transform: rotate(180deg); }
+	75% { transform: rotate(270deg); }
+	100% { transform: rotate(360deg); }
+}
+
+.robot {
+	width: 50px;
+	height: 50px;
+	background: url(./sprites.svg) -100px -100px;
 }
 
 #log {

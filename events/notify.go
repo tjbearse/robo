@@ -36,38 +36,37 @@ const (
 )
 
 type NotifyRobotMoved struct {
-	Name string
+	Player string
 	Reason MoveReason
 	OldConfig coords.Configuration
 	NewConfig coords.Configuration
 }
 
-// FIXME clarity between robot and player names
-// is there a better way to identify, e.g. a typed ID?
+// TODO is there a better way to identify, e.g. a typed ID?
 type NotifyRobotFell struct {
-	Name string
+	Player string
 	Reason MoveReason
 	OldConfig coords.Configuration
 	Target coords.Configuration
 }
 
 type NotifyRevealCard struct {
-	Name string
+	Player string
 	Card cards.Card
 }
 
 type NotifySpawnUpdate struct {
-	Name string
+	Player string
 	Coord coords.Coord
 }
 
 type NotifyFlagTouched struct {
-	Name string
+	Player string
 	FlagNum int
 }
 
 type NotifyPlayerFinished struct {
-	Name string
+	Player string
 }
 
 type NotifyStartSpawn struct {}
@@ -94,7 +93,12 @@ type NotifyCardToHandBlind struct {
 	BoardSlot uint
 }
 
+type NotifyCleanup struct {
+	Player string
+	Board []*cards.Card
+}
+
 // FIXME too generic
 type NotifyPlayerReady struct {
-	Name string
+	Player string
 }
