@@ -1,11 +1,19 @@
 package events
 
 import (
-	"github.com/tjbearse/robo/game/coords"
+	"github.com/tjbearse/robo/game"
 	"github.com/tjbearse/robo/game/cards"
+	"github.com/tjbearse/robo/game/coords"
 )
 
 // Events that notify the players of happenings
+type NotifyBoard struct {
+	Board game.PlainBoard
+}
+
+type NotifyNewGame struct {
+	GameId GameId
+}
 
 type NotifyRemovePlayer struct {
 	Name string

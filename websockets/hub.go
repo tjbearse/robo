@@ -69,6 +69,7 @@ func (h *Hub) run() {
 func (h *Hub) NonBlockingSend(e Envelope) {
 	fmt.Printf("out: %s\n", e.Msg)
 	if e.Client == nil {
+		// TODO obsolete, don't need catch all sends
 		for client := range h.clients {
 			select {
 			case client.send <- e.Msg:
@@ -78,11 +79,14 @@ func (h *Hub) NonBlockingSend(e Envelope) {
 			}
 		}
 	} else {
-		select {
-		case e.Client.send <- e.Msg:
-		default:
-			close(e.Client.send)
-			delete(h.clients, e.Client)
+		// FIXME: bridge doesn't realize clients get closed and keeps associations to them
+		if h.clients[e.Client] {
+			select {
+			case e.Client.send <- e.Msg:
+			default:
+				close(e.Client.send)
+				delete(h.clients, e.Client)
+			}
 		}
 	}
 }

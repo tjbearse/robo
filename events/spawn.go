@@ -5,14 +5,19 @@ import (
 
 	"github.com/tjbearse/robo/game"
 	"github.com/tjbearse/robo/game/coords"
+	"github.com/tjbearse/robo/events/comm"
 )
 
 type SpawnPhase struct {
 	waiting map[*game.Player]bool
 }
 
-func StartSpawnPhase(c commClient, g *game.Game) {
-	c.Broadcast(NotifyStartSpawn{})
+func StartSpawnPhase(cc comm.CommClient) {
+	c, g, err := comm.WithGameContext(cc)
+	if err != nil {
+		// TODO err handle
+	}
+	c.Broadcast(g, NotifyStartSpawn{})
 
 	selecting := map[*game.Player]bool{}
 	for p := range(g.GetPlayers()) {
@@ -27,19 +32,19 @@ func StartSpawnPhase(c commClient, g *game.Game) {
 				}
 				p.Spawn.State = game.Rotatable
 				p.Spawn.Coord = config.Location
-				c.Broadcast(NotifySpawnUpdate{p.Name, config.Location})
-				spawn(c, p, config)
+				c.Broadcast(g, NotifySpawnUpdate{p.Name, config.Location})
+				c.Broadcast(g, executeSpawn(p, config))
 			case game.Rotatable:
 				loc := p.Spawn.Coord
 				prompt := PromptForSpawn{p.Name, loc}
-				c.Message(prompt, p)
+				c.MessagePlayer(p, prompt)
 				selecting[p] = false
 			}
 		}
 	}
 
 	if len(selecting) == 0 {
-		StartCardsPhase(c, g)
+		StartCardsPhase(cc)
 	} else {
 		g.ChangePhase(&SpawnPhase{selecting})
 	}
@@ -48,8 +53,8 @@ func StartSpawnPhase(c commClient, g *game.Game) {
 type SetSpawnHeading struct {
 	Dir coords.Dir
 }
-func (e SetSpawnHeading) Exec(c commClient, g *game.Game) error {
-	p, err := getPlayer(c)
+func (e SetSpawnHeading) Exec(cc comm.CommClient) error {
+	c, g, p, err := comm.WithPlayerContext(cc)
 	if err != nil {
 		return err
 	}
@@ -57,7 +62,7 @@ func (e SetSpawnHeading) Exec(c commClient, g *game.Game) error {
 	uPhase := g.GetPhase()
 	ph, ok := uPhase.(*SpawnPhase)
 	if !ok {
-		return errors.New("Not the right phase")
+		return wrongPhaseError
 	}
 
 	if _, ok := ph.waiting[p]; ok != true {
@@ -65,18 +70,18 @@ func (e SetSpawnHeading) Exec(c commClient, g *game.Game) error {
 	}
 	delete(ph.waiting, p)
 	config := coords.Configuration{p.Spawn.Coord, e.Dir}
-	spawn(c, p, config)
+	c.Broadcast(g, executeSpawn(p, config))
 
 	if len(ph.waiting) != 0 {
 		return nil
 	}
 
-	StartCardsPhase(c, g)
+	StartCardsPhase(cc)
 	return nil
 }
 
-func spawn(comm commClient, p *game.Player, c coords.Configuration) {
+func executeSpawn(p *game.Player, c coords.Configuration) NotifyRobotMoved {
 	r := &p.Robot
 	r.Configuration = &c
-	comm.Broadcast(NotifyRobotMoved{p.Name, Spawned, coords.Configuration{}, c})
+	return NotifyRobotMoved{p.Name, Spawned, coords.Configuration{}, c}
 }

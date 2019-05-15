@@ -3,21 +3,34 @@ package events
 import (
 	"fmt"
 
+	"github.com/tjbearse/robo/events/comm"
 	"github.com/tjbearse/robo/game"
 	"github.com/tjbearse/robo/game/cards"
 )
 
 type AddPlayerPhase struct {}
 
+// TODO need to be able to handle zero state everywhere!
 type JoinGame struct {
-	Name string
+	PlayerName string
+	Game GameId
 }
 // TODO restrict these actions to this phase?
 // these actions are pretty general and will probably be reused
 // across states. Perhaps let phases define their own behaviors
 // for them and cover basics here.
-func (j JoinGame) Exec(c commClient, g *game.Game) error {
-	name := j.Name
+func (j JoinGame) Exec(cc comm.CommClient) error {
+	c,err := comm.WithoutContext(cc)
+	if err != nil {
+		return err
+	}
+
+	g, ok := gameStore[j.Game]
+	if !ok {
+		return fmt.Errorf("game (%s) doesn't exist", j.Game)
+	}
+
+	name := j.PlayerName
 	players := g.GetPlayers()
 	for p := range(players) {
 		if p.Name == name {
@@ -27,42 +40,49 @@ func (j JoinGame) Exec(c commClient, g *game.Game) error {
 
 	board := make([]*cards.Card, Steps)
 	r := game.Robot{0, RobotMaxLives, board, nil}
-	p := game.Player{name, r, game.Spawn{}, 0}
-	players[&p] = true
+	p := &game.Player{name, r, game.Spawn{}, 0}
+	players[p] = true
 	g.UpdatePlayers(players)
-	c.Associate(&p)
-	c.Message(NotifyWelcome{name}, &p)
-	c.Broadcast(NotifyAddPlayer{name})
-	// TODO fill in the player on what the current game state is (existing players at least)
+	c.SetGame(g)
+	c.SetPlayer(p)
+	c.Reply(NotifyWelcome{name})
+	// fill in player on other existing players
+	for op := range(players) {
+		if op != p {
+			c.Reply(NotifyAddPlayer{op.Name})
+		}
+	}
+	c.Broadcast(g, NotifyAddPlayer{name})
 	return nil
 }
 
 type LeaveGame struct {}
-func (e LeaveGame) Exec(c commClient, g *game.Game) error {
-	p, err := getPlayer(c)
+func (e LeaveGame) Exec(cc comm.CommClient) error {
+	c, g, p, err := comm.WithPlayerContext(cc)
 	if err != nil {
 		return err
 	}
 	players := g.GetPlayers()
 	delete(players, p)
 	g.UpdatePlayers(players)
-	c.Deassociate()
-	c.Broadcast(NotifyRemovePlayer{p.Name})
+	c.Clear()
+	c.Broadcast(g, NotifyRemovePlayer{p.Name})
 	return nil
 }
 
 type ReadyToSpawn struct {}
-func (ReadyToSpawn) Exec(c commClient, g *game.Game) error {
-	/*
-	// TODO there should be a phase check here but the phase isn't initialized properly
-	uPhase := g.GetPhase()
-	_, ok := uPhase.(*AddPlayerPhase)
-	_, ok2 := uPhase.(*SimulationPhase)
-	if !ok && !ok2 {
-		return errors.New("Not the right phase")
+func (ReadyToSpawn) Exec(cc comm.CommClient) error {
+	c, g, err := comm.WithGameContext(cc)
+	if err != nil {
+		return err
 	}
-	*/
+	uPhase := g.GetPhase()
+	if _, ok := uPhase.(*AddPlayerPhase); ok {
+		c.Broadcast(g, NotifyBoard{g.Board.GetBoardDump()})
+	} else if _, ok = uPhase.(*SimulationPhase); !ok {
+		return wrongPhaseError
+	}
 
-	StartSpawnPhase(c, g)
+	StartSpawnPhase(cc)
 	return nil
 }

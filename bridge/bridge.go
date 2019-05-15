@@ -4,65 +4,82 @@ import (
 	"errors"
 	"encoding/json"
 	"fmt"
-	"reflect"
 	
-	"github.com/tjbearse/robo/events"
-	"github.com/tjbearse/robo/game"
 	"github.com/tjbearse/robo/websockets"
+	"github.com/tjbearse/robo/events/comm"
 )
 
-const (
-	AddPlayer string = "AddPlayer"
-	AddSelection string = "AddSelection"
-	Ready string = "Ready"
-	RemovePlayer string = "RemovePlayer"
-	SelectSpawnHeading string = "SelectSpawnHeading"
-)
-
-type commEntity interface{}
+type commEntity *websockets.Client
 
 // start bridge file
 type Bridge struct {
-	game *game.Game
-	cl2P map[commEntity]*game.Player
-	p2Cl map[*game.Player]*websockets.Client
+	clientToContext map[commEntity]map[comm.ContextKey]comm.ContextValue
+	contextToClient map[comm.ContextKey]map[comm.ContextValue]map[commEntity]bool
+	eventMap map[string]func()comm.IncomingEvent
 }
 
-func NewBridge(g *game.Game) Bridge {
+func NewBridge(eventMap map[string]func()comm.IncomingEvent) Bridge {
 	return Bridge{
-		g,
-		map[commEntity]*game.Player{},
-		map[*game.Player]*websockets.Client{},
+		map[commEntity]map[comm.ContextKey]comm.ContextValue{},
+		map[comm.ContextKey]map[comm.ContextValue]map[commEntity]bool{},
+		eventMap,
 	}
 }
 
-func (b *Bridge) associate(c *websockets.Client, p *game.Player) {
-	b.cl2P[c] = p
-	b.p2Cl[p] = c
+func (b *Bridge) associate(c commEntity, k comm.ContextKey, v comm.ContextValue) {
+	if b.clientToContext[c] == nil {
+		b.clientToContext[c] = map[comm.ContextKey]comm.ContextValue{}
+	}
+	b.clientToContext[c][k] = v
+
+	if b.contextToClient[k] == nil {
+		b.contextToClient[k] = map[comm.ContextValue]map[commEntity]bool{}
+	}
+	if b.contextToClient[k][v] == nil {
+		b.contextToClient[k][v] = map[commEntity]bool{}
+	}
+	b.contextToClient[k][v][c] = true
 }
 
-func (b *Bridge) deassociate(c *websockets.Client) {
-	p := b.cl2P[c]
-	delete(b.cl2P, c)
-	delete(b.p2Cl, p)
+func (b *Bridge) clear(c commEntity) {
+	if b.clientToContext[c] == nil {
+		return
+	}
+	for k, v := range(b.clientToContext[c]) {
+		delete(b.contextToClient[k][v], c)
+	}
+	delete(b.clientToContext, c)
 }
 
-func (b *Bridge) getClient(p *game.Player) *websockets.Client {
-	return b.p2Cl[p]
+func (b *Bridge) getClients(k comm.ContextKey, v comm.ContextValue) []commEntity {
+	m := b.contextToClient[k][v]
+	if m == nil {
+		return []commEntity{}
+	}
+
+    clients := make([]commEntity, len(m))
+	i := 0
+    for k := range m {
+        clients[i] = k
+		i++
+    }
+	return clients
 }
 
+func (b *Bridge) getContext(c commEntity, k comm.ContextKey) comm.ContextValue {
+	return b.clientToContext[c][k]
+}
 
 // TODO remove direct websockets references
 // e.g. unpack envelopes. *Client may be a little harder
 func (c *Bridge) ActOnMessage(renv websockets.Envelope, send func(websockets.Envelope)) {
-	p, _ := c.cl2P[renv.Client];
-	comm := commClient{c, send, renv.Client, p}
-	event, err := unpackIncomingEvent(renv.Msg);
+	comm := commClient{c, send, renv.Client}
+	event, err := c.unpackIncomingEvent(renv.Msg);
 	if err != nil {
 		comm.SendError(err)
 		return
 	}
-	err = event.Exec(&comm, c.game)
+	err = event.Exec(comm)
 	if err != nil {
 		comm.SendError(err)
 	}
@@ -75,18 +92,8 @@ type Envelope struct {
 
 
 
-var eventMap = map[string]reflect.Type {
-	"JoinGame": reflect.TypeOf(events.JoinGame{}),
-	"LeaveGame": reflect.TypeOf(events.LeaveGame{}),
-	"ReadyToSpawn": reflect.TypeOf(events.ReadyToSpawn{}),
-	"SetSpawnHeading": reflect.TypeOf(events.SetSpawnHeading{}),
-	"CardToBoard": reflect.TypeOf(events.CardToBoard{}),
-	"CardToHand": reflect.TypeOf(events.CardToHand{}),
-	"CommitCards": reflect.TypeOf(events.CommitCards{}),
-}
-
 // decide which context we have before this point
-func unpackIncomingEvent(b []byte) (events.IncomingEvent, error) {
+func (bridge *Bridge) unpackIncomingEvent(b []byte) (comm.IncomingEvent, error) {
 	// read envelope
 	var msg json.RawMessage
 	env := Envelope {
@@ -96,15 +103,11 @@ func unpackIncomingEvent(b []byte) (events.IncomingEvent, error) {
 		return nil, errors.New("Couldn't unpack message")
 	}
 
-	t, ok := eventMap[env.Type]
+	t, ok := bridge.eventMap[env.Type]
 	if ok != true {
 		return nil, errors.New("Event didn't match known type")
 	}
-	ghost := reflect.New(t).Interface()
-	event, ok := ghost.(events.IncomingEvent)
-	if !ok {
-		return nil, errors.New("reflection unsuccessful")
-	}
+	event := t()
 
 	if err := json.Unmarshal(msg, event); err != nil {
 		return nil, fmt.Errorf("Couldn't unpack message as %s, %v", env.Type, string(msg))

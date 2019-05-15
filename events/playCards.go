@@ -6,11 +6,16 @@ import (
 
 	"github.com/tjbearse/robo/game"
 	"github.com/tjbearse/robo/game/cards"
+	"github.com/tjbearse/robo/events/comm"
 )
 
 
 // TODO there is an option to power down instead of receiving cards
-func StartCardsPhase (c commClient, g *game.Game) {
+func StartCardsPhase (cc comm.CommClient) {
+	c, g, err := comm.WithGameContext(cc)
+	if err != nil {
+		return // TODO
+	}
 	hands := map[*game.Player][]cards.Card{}
 	players := g.GetPlayers()
 	for p := range(players) {
@@ -19,7 +24,7 @@ func StartCardsPhase (c commClient, g *game.Game) {
 			hands[p] = cards
 			// TODO add info for num cards of others?
 			prompt := PromptWithHand{hands[p]}
-			c.Message(prompt, p)
+			c.MessagePlayer(p, prompt)
 		}
 	}
 	newPh := PlayCardsPhase{hands, map[*game.Player]bool{}}
@@ -38,8 +43,8 @@ type CardToBoard struct {
 	BoardSlot uint
 }
 
-func (e CardToBoard) Exec(c commClient, g *game.Game) error {
-	p, err := getPlayer(c)
+func (e CardToBoard) Exec(cc comm.CommClient) error {
+	c, g, p, err := comm.WithPlayerContext(cc)
 	if err != nil {
 		return err
 	}
@@ -47,7 +52,7 @@ func (e CardToBoard) Exec(c commClient, g *game.Game) error {
 	uPhase := g.GetPhase()
 	ph, ok := uPhase.(*PlayCardsPhase)
 	if !ok {
-		return errors.New("Not the right phase")
+		return wrongPhaseError
 	}
 
 	hand := ph.Hands[p]
@@ -69,16 +74,16 @@ func (e CardToBoard) Exec(c commClient, g *game.Game) error {
 	hand = append(hand[:co], hand[co+1:]...)
 	ph.Hands[p] = hand
 
-	c.Broadcast(NotifyCardToBoardBlind{p.Name, slot})
-	c.Message(NotifyCardToBoard{slot, co, card}, p)
+	c.Broadcast(g, NotifyCardToBoardBlind{p.Name, slot})
+	c.MessagePlayer(p, NotifyCardToBoard{slot, co, card})
 	return nil
 }
 
 type CardToHand struct {
 	BoardSlot uint
 }
-func (e CardToHand) Exec(c commClient, g *game.Game) error {
-	p, err := getPlayer(c)
+func (e CardToHand) Exec(cc comm.CommClient) error {
+	c, g, p, err := comm.WithPlayerContext(cc)
 	if err != nil {
 		return err
 	}
@@ -86,8 +91,7 @@ func (e CardToHand) Exec(c commClient, g *game.Game) error {
 	uPhase := g.GetPhase()
 	ph, ok := uPhase.(*PlayCardsPhase)
 	if !ok {
-		// TODO abstract this repetitive error message
-		return errors.New("Not the right phase")
+		return wrongPhaseError
 	}
 
 	slot := e.BoardSlot
@@ -104,14 +108,14 @@ func (e CardToHand) Exec(c commClient, g *game.Game) error {
 	ph.Hands[p] = append(hand, card)
 	p.Robot.Board[slot] = nil
 
-	c.Broadcast(NotifyCardToHandBlind{p.Name, slot})
-	c.Message(NotifyCardToHand{slot, co, card}, p)
+	c.Broadcast(g, NotifyCardToHandBlind{p.Name, slot})
+	c.MessagePlayer(p, NotifyCardToHand{slot, co, card})
 	return nil
 }
 
 type CommitCards struct {}
-func (e CommitCards) Exec(c commClient, g *game.Game) error {
-	p, err := getPlayer(c)
+func (e CommitCards) Exec(cc comm.CommClient) error {
+	c, g, p, err := comm.WithPlayerContext(cc)
 	if err != nil {
 		return err
 	}
@@ -119,14 +123,14 @@ func (e CommitCards) Exec(c commClient, g *game.Game) error {
 	uPhase := g.GetPhase()
 	ph, ok := uPhase.(*PlayCardsPhase)
 	if !ok {
-		return errors.New("Not the right phase")
+		return wrongPhaseError
 	}
-	// TODO check if hand full
+	// TODO check if actually played cards
 	if ph.Ready[p] == true {
 		return errors.New("Already ready")
 	}
 	ph.Ready[p] = true
-	c.Broadcast(NotifyPlayerReady{p.Name})
+	c.Broadcast(g, NotifyPlayerReady{p.Name})
 
 	for _, ready := range(ph.Ready) {
 		if !ready {
@@ -134,6 +138,6 @@ func (e CommitCards) Exec(c commClient, g *game.Game) error {
 		}
 	}
 	// all ready
-	StartSimulationPhase(c,g)
+	StartSimulationPhase(cc)
 	return nil
 }

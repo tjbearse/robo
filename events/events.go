@@ -1,11 +1,25 @@
 package events
 
 import (
-	"github.com/tjbearse/robo/game"
+	"errors"
+
+	"github.com/tjbearse/robo/events/comm"
 )
 
-type IncomingEvent interface {
-	Exec(commClient, *game.Game) error
+var EventMap = map[string]func() comm.IncomingEvent {
+	// Note these must be pointers for the decoding to work
+	"NewGame": func () comm.IncomingEvent { return &NewGame{} },
+	"JoinGame": func () comm.IncomingEvent { return &JoinGame{} },
+	"LeaveGame": func () comm.IncomingEvent { return &LeaveGame{} },
+	"ReadyToSpawn": func () comm.IncomingEvent { return &ReadyToSpawn{} },
+	"SetSpawnHeading": func () comm.IncomingEvent { return &SetSpawnHeading{} },
+	"CardToBoard": func () comm.IncomingEvent { return &CardToBoard{} },
+	"CardToHand": func () comm.IncomingEvent { return &CardToHand{} },
+	"CommitCards": func () comm.IncomingEvent { return &CommitCards{} },
 }
 
-type OutGoingEvent interface {}
+var wrongPhaseError = errors.New("Not the right phase")
+
+const RobotMaxLives int = 3
+const HandSize int = 8
+const Steps int = 5

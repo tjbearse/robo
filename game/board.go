@@ -26,19 +26,31 @@ type Tile struct {
 	Dir coords.Dir
 }
 
+type PlainBoard struct {
+	Tiles [][]Tile
+	Nwalls [][]bool
+	Wwalls [][]bool
+	FlagOrder []coords.Coord
+}
 // Board represents the playing space
 type Board struct {
 	tiles [][]Tile
-	nwalls [][]bool // n+1 x m+1
-	wwalls [][]bool // n+1 x m+1
+	// FIXME nwall only needs to be one taller, not one wider than Tiles
+	nwalls [][]bool // x+1, y+1 -> x,y+1
+	// FIXME similar for wwalls but reversed
+	wwalls [][]bool // x+1, y+1 -> x+1,y
 	lasers []coords.Coord
-	flags []coords.Coord // order matters
+	flagOrder []coords.Coord
 
 	spawns []coords.Configuration
 	usedSpawn int
 }
 
-func NewBoard(tiles [][]Tile, nwalls [][]bool, wwalls [][]bool, flags []coords.Coord, spawns []coords.Configuration) (*Board, error) {
+func NewBoard(plain PlainBoard, spawns []coords.Configuration) (*Board, error) {
+	tiles := plain.Tiles
+	nwalls := plain.Nwalls
+	wwalls := plain.Wwalls
+	flags := plain.FlagOrder
 	if len(tiles) == 0 ||
 		len(tiles[0]) == 0 ||
 		len(tiles[0]) + 1 != len(nwalls[0]) ||
@@ -78,15 +90,24 @@ func NewBoard(tiles [][]Tile, nwalls [][]bool, wwalls [][]bool, flags []coords.C
 	return &board, nil
 }
 
+func (b *Board) GetBoardDump() PlainBoard {
+	return PlainBoard{
+		b.tiles,
+		b.nwalls,
+		b.wwalls,
+		b.flagOrder,
+	}
+}
+
 func (b *Board) GetNumFlags() (int) {
-	return len(b.flags)
+	return len(b.flagOrder)
 }
 
 func (b *Board) GetFlag(i int) (coords.Coord, error) {
-	if i < 0 || i >= len(b.flags) {
+	if i < 0 || i >= len(b.flagOrder) {
 		return coords.Coord{}, fmt.Errorf("out of range index: %d", i)
 	}
-	return b.flags[i], nil
+	return b.flagOrder[i], nil
 }
 
 func (b *Board) GetTile(c coords.Coord) (Tile, error) {

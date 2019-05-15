@@ -8,27 +8,28 @@ import (
 
 func GetDefaultBoard() (*Board, error) {
 	width, height := 10, 10
-	tiles := make([][]Tile, width)
+	pb := PlainBoard{}
+	pb.Tiles = make([][]Tile, width)
 	for x := 0; x < width; x++ {
-		tiles[x] = make([]Tile, height)
+		pb.Tiles[x] = make([]Tile, height)
 	}
 	types := []TileType{Pit, Repair, Upgrade, Conveyor, ExpressConveyor, Pusher, Laser}
 	for i := 0; i < width && i < height; i++ {
 		idx := i % len(types)
-		tiles[i][i].Type = types[idx]
+		pb.Tiles[i][i].Type = types[idx]
 	}
 
-	wwalls := make([][]bool, width+1)
-	for x := 0; x < len(wwalls); x++ {
-		wwalls[x] = make([]bool, height+1)
+	pb.Wwalls = make([][]bool, width+1)
+	for x := 0; x < len(pb.Wwalls); x++ {
+		pb.Wwalls[x] = make([]bool, height+1)
 	}
-	nwalls := make([][]bool, width+1)
-	for x := 0; x < len(nwalls); x++ {
-		nwalls[x] = make([]bool, height+1)
+	pb.Nwalls = make([][]bool, width+1)
+	for x := 0; x < len(pb.Nwalls); x++ {
+		pb.Nwalls[x] = make([]bool, height+1)
 	}
 
-	tiles[2][4].Type = Flag
-	flags := []Coord{{2,4}}
+	pb.Tiles[2][4].Type = Flag
+	pb.FlagOrder = []Coord{{2,4}}
 
 	spawns := []Configuration{
 		{Coord{1,0},West},
@@ -40,5 +41,5 @@ func GetDefaultBoard() (*Board, error) {
 		{Coord{0,6},West},
 		{Coord{0,7},West},
 	}
-	return NewBoard(tiles, nwalls, wwalls, flags, spawns)
+	return NewBoard(pb, spawns)
 }

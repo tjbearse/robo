@@ -1,10 +1,7 @@
 import { createReducer } from 'redux-starter-kit'
 import notify from '../actions/notify'
 import playersReducer from './player'
-
-//
-const boardReducer = createReducer([], {
-})
+import boardReducer from './board'
 
 enum Phases {
 	Join,
@@ -33,19 +30,4 @@ const rootReducer = combineReducers({
 	phase: phaseReducer,
 })
 
-
 export default rootReducer
-/*
-// Types
-	tile: {
-		Type
-		Dir
-		Num (flags and initial spawns)
-		Walls: N,E,S,W
-	}
-
-// Store
-	board: {
-		tiles: [][]
-	},
-*/

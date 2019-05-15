@@ -3,21 +3,25 @@ package events
 import (
 	"sort"
 
+	"github.com/tjbearse/robo/events/comm"
 	"github.com/tjbearse/robo/game"
 	"github.com/tjbearse/robo/game/cards"
 	"github.com/tjbearse/robo/game/coords"
 )
 
-func StartSimulationPhase(c commClient, g *game.Game) {
-	// notify simulation phase begun
+func StartSimulationPhase(cc comm.CommClient) {
+	c, g, err := comm.WithGameContext(cc)
+	if err != nil {
+		return // TODO
+	}
 	g.ChangePhase(&SimulationPhase{})
 	runTurn(c,g)
-	StartSpawnPhase(c, g)
+	StartSpawnPhase(cc)
 }
 
 type SimulationPhase struct {}
 
-func runTurn(c commClient, g *game.Game) {
+func runTurn(c comm.ExtendedCommClient, g *game.Game) {
 	for reg:=0; reg < Steps; reg++ {
 		runRegister(c, g, reg)
 	}
@@ -29,13 +33,15 @@ type commandPair struct {
 	Card cards.Card
 }
 
-func runRegister(c commClient, g *game.Game, reg int) {
+func runRegister(c comm.ExtendedCommClient, g *game.Game, reg int) {
 	// Flip Cards
 	commands := flipCards(g, reg)
+	for _, command := range(commands) {
+		c.Broadcast(g, NotifyRevealCard{command.Player.Name, command.Card})
+	}
 
 	// Move Robots
 	for _, command := range(commands) {
-		c.Broadcast(NotifyRevealCard{command.Player.Name, command.Card})
 		resolveMove(c, g, command)
 	}
 
@@ -59,7 +65,7 @@ func flipCards(g *game.Game, round int) []commandPair {
 	return commands
 }
 
-func resolveMove(c commClient, g *game.Game, cp commandPair) {
+func resolveMove(c comm.ExtendedCommClient, g *game.Game, cp commandPair) {
 	p := cp.Player
 	if p.Robot.Configuration == nil {
 		return
@@ -71,7 +77,7 @@ func resolveMove(c commClient, g *game.Game, cp commandPair) {
 		// Rotations always succeed
 		if desiredMove.Location == previous.Location {
 			if desiredMove.Heading != previous.Heading {
-				c.Broadcast(NotifyRobotMoved{p.Name, Moved, previous, desiredMove})
+				c.Broadcast(g, NotifyRobotMoved{p.Name, Moved, previous, desiredMove})
 				*p.Robot.Configuration = desiredMove
 			}
 		}
@@ -83,14 +89,14 @@ func resolveMove(c commClient, g *game.Game, cp commandPair) {
 }
 
 // TODO should these events be collected together? Perhaps return those instead
-func attemptMove(c commClient, g *game.Game, loc coords.Coord, p *game.Player, reason MoveReason) (success bool) {
+func attemptMove(c comm.ExtendedCommClient, g *game.Game, loc coords.Coord, p *game.Player, reason MoveReason) (success bool) {
 	r := &p.Robot
 	if r.Configuration == nil {
 		return false
 	}
 	target := coords.Configuration{loc, r.Configuration.Heading}
 	if !g.Board.IsInbounds(loc) {
-		robotFalls(c, p, target, reason)
+		c.Broadcast(g, executeRobotFall(p, target, reason))
 		return true
 	}
 	// FIXME ignored error
@@ -101,7 +107,7 @@ func attemptMove(c commClient, g *game.Game, loc coords.Coord, p *game.Player, r
 
 	tile, _ := g.Board.GetTile(loc)
 	if tile.Type == game.Pit {
-		robotFalls(c, p, target, reason)
+		c.Broadcast(g, executeRobotFall(p, target, reason))
 		return true
 	}
 	collidePlayer := g.CheckForRobot(loc)
@@ -116,29 +122,29 @@ func attemptMove(c commClient, g *game.Game, loc coords.Coord, p *game.Player, r
 		}
 	}
 	// moveThere
-	c.Broadcast(NotifyRobotMoved{p.Name, reason, *r.Configuration, target})
+	c.Broadcast(g, NotifyRobotMoved{p.Name, reason, *r.Configuration, target})
 	*r.Configuration = target
 	return true
 }
 
-func moveConveyors(c commClient, g *game.Game) {
+func moveConveyors(c comm.ExtendedCommClient, g *game.Game) {
 	// move Express Conveyors
 	// move all conveyors
 }
 
 // TODO pushersPush
-func pushersPush(c commClient, g *game.Game, reg int) {
+func pushersPush(c comm.ExtendedCommClient, g *game.Game, reg int) {
 }
 
 // TODO gearsRotate
-func gearsRotate(c commClient, g *game.Game) {
+func gearsRotate(c comm.ExtendedCommClient, g *game.Game) {
 }
 
 // TODO lasers fire
-func fireLasers(c commClient, g *game.Game, reg int) {
+func fireLasers(c comm.ExtendedCommClient, g *game.Game, reg int) {
 }
 
-func touchCheckpoints(c commClient, g *game.Game) {
+func touchCheckpoints(c comm.ExtendedCommClient, g *game.Game) {
 	players := g.GetPlayers()
 	for p, _ := range(players) {
 		if p.Robot.Configuration != nil {
@@ -152,7 +158,7 @@ func touchCheckpoints(c commClient, g *game.Game) {
 			if tile.Type == game.Repair ||
 				tile.Type == game.Flag ||
 				tile.Type == game.Upgrade {
-				c.Broadcast(NotifySpawnUpdate{p.Name, loc})
+				c.Broadcast(g, NotifySpawnUpdate{p.Name, loc})
 				p.Spawn.State = game.Rotatable
 				p.Spawn.Coord = loc
 			}
@@ -164,25 +170,26 @@ func touchCheckpoints(c commClient, g *game.Game) {
 				continue
 			}
 			if tile.Type == game.Flag && loc == nextFlag {
-				c.Broadcast(NotifyFlagTouched{p.Name, p.FlagNum})
+				c.Broadcast(g, NotifyFlagTouched{p.Name, p.FlagNum})
 				p.FlagNum++
 
 				if p.FlagNum == g.Board.GetNumFlags() {
-					StartGameWon(c, g, p)
+					StartGameWon(c.CommClient, p)
 				}
 			}
 		}
 	}
 }
 
-func cleanup(c commClient, g *game.Game) {
+func cleanup(c comm.ExtendedCommClient, g *game.Game) {
 	// Repairs & Upgrades
 	// Wiping Registers
 }
 
-func robotFalls(c commClient, p *game.Player, target coords.Configuration, reason MoveReason) {
+func executeRobotFall(p *game.Player, target coords.Configuration, reason MoveReason) NotifyRobotFell {
 	r := &p.Robot
 	r.Lives--
-	c.Broadcast(NotifyRobotFell{p.Name, reason, *r.Configuration, target})
+	e := NotifyRobotFell{p.Name, reason, *r.Configuration, target}
 	r.Configuration = nil
+	return e
 }

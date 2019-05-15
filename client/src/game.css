@@ -13,11 +13,21 @@ body {
 }
 
 #messages {
-	width: 80%;
+	width: 25%;
 	height: 100%;
 	position: relative;
 	float: left;
 }
+#gameArea {
+	width: 50%;
+	height: 100%;
+	float: left;
+}
+
+#board {
+	background: white;
+}
+
 #log {
     background: white;
     margin: 0;

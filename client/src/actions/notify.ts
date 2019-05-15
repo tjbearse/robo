@@ -14,6 +14,7 @@ enum Notifications {
 	StartSpawn = 'NotifyStartSpawn',
 	PlayerFinished = 'NotifyPlayerFinished',
 
+
 	// card related
 	PromptWithHand = 'PromptWithHand',
 	CardToBoard = 'NotifyCardToBoard',
@@ -22,6 +23,9 @@ enum Notifications {
 	CardToHandBlind = 'NotifyCardToHandBlind',
 	RevealCard = 'NotifyRevealCard',
 	PlayerReady = 'NotifyPlayerReady',
+
+	// uncat
+	Board = 'NotifyBoard',
 }
 
 export default Notifications

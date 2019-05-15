@@ -1,12 +1,44 @@
 import store from "./store"
 
+// This file is mostly temporary stuff while I work on data store
+
 console.log(store.getState())
 const unsubscribe = store.subscribe(() => console.log(store.getState()))
+
 window.onload = windowOnLoad
 var conn;
 window.sendEvent = sendEvent
 
 // --
+
+function drawCrappyVersion(state) {
+	const {
+		players: {me, players},
+		board, 
+		phase
+	} = state
+	const myPlayer = players[me]
+
+	let e = document.createElement('div')
+	e.id = 'gameArea'
+	
+	e.appendChild(drawCrappyBoard(board, players))
+	e.appendChild(drawMyHandAndBoard(myPlayer))
+
+	let old = document.getElementById('gameArea')
+	old.parentNode.replaceChild(e, old);
+	return
+
+	// --
+
+	function drawCrappyBoard(board, players){
+		let eBoard = document.createElement('div')
+		return eBoard
+	}
+	function drawMyHandAndBoard(){
+		return document.createElement('div')
+	}
+}
 
 function dispatchAction(wsFormat) {
 	let action = {
@@ -25,6 +57,8 @@ function windowOnLoad() {
     var type = document.getElementById("Type");
     var log = document.getElementById("log");
 
+	drawCrappyVersion(store.getState())
+	const unsubscribeDraw = store.subscribe(() => drawCrappyVersion(store.getState()))
 
     document.getElementById("form").onsubmit = function () {
         if (!conn) {

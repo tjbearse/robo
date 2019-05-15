@@ -16,7 +16,10 @@
 			</br>
 			<input type="submit" value="Send" />
 	</div>
+	<div id="gameArea">
+	</div>
 	<div id="helperBtns">
+	  <button onclick="sendEvent('NewGame', { PlayerName: 'TJ' })">NewGame</button>
 	  <button onclick="sendEvent('JoinGame', { Name: 'TJ' })">JoinGame</button>
 	  <button onclick="sendEvent('ReadyToSpawn', {})">ReadyToSpawn</button>
 	</div>
