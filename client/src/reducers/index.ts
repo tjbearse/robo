@@ -11,8 +11,12 @@ enum Phases {
 	GameOver,
 }
 
-const phaseReducer = createReducer(Phases.Join, {
-    [notify.StartSpawn]: (state, action) => Phases.Spawn
+const gameInfoReducer = createReducer({
+	id: '',
+	phase: Phases.Join
+}, {
+    [notify.StartSpawn]: (state, action) => { state.phase = Phases.Spawn },
+	[notify.Welcome]: (state, { payload: { GameId }}) => ({ id: GameId, phase: Phases.Join })
 	// PlayerFinished = 'NotifyPlayerFinished',
 })
 
@@ -21,13 +25,23 @@ const phaseReducer = createReducer(Phases.Join, {
   PromptForSpawn = 'PromptForSpawn',
 */
 
+const uiInfoReducer = createReducer({
+	colors: {map: {}, count: 0},
+}, {
+	[notify.AddPlayer]: (state, {payload: {Name}}) => {
+		state.colors.map[Name] = state.colors.count
+		state.colors.count++
+	},
+})
+
 // root
 import { combineReducers } from 'redux'
 
 const rootReducer = combineReducers({
 	players: playersReducer,
 	board: boardReducer,
-	phase: phaseReducer,
+	gameInfo: gameInfoReducer,
+	uiInfo: uiInfoReducer,
 })
 
 export default rootReducer

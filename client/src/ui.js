@@ -4,17 +4,19 @@ export default function drawCrappyVersion(state) {
 	const {
 		players: {me, players},
 		board, 
-		phase
+		phase,
+		uiInfo,
+		gameInfo,
 	} = state
 	const myPlayer = players[me]
 
 	let e = document.createElement('div')
 	e.id = 'gameArea'
 	let eGameId = document.createElement('div')
-	eGameId.innerText = 'GameId: ' + state.gameInfo.id
+	eGameId.innerText = 'GameId: ' + gameInfo.id
 	e.appendChild(eGameId)
 	
-	e.appendChild(drawCrappyBoard(board, players))
+	e.appendChild(drawCrappyBoard(board, players, uiInfo))
 	if (myPlayer) {
 		e.appendChild(drawMyHandAndBoard(myPlayer))
 	}
@@ -25,7 +27,7 @@ export default function drawCrappyVersion(state) {
 
 	// --
 
-	function drawCrappyBoard(board, players){
+	function drawCrappyBoard(board, players, { colors }){
 		let eBoard = document.createElement('table')
 		eBoard.id = 'board'
 		if (board.length == 0) {
@@ -79,8 +81,8 @@ export default function drawCrappyVersion(state) {
 				if (coords[x] && coords[x][y]) {
 					let player = coords[x][y]
 					let eRobot = document.createElement('div')
-					eRobot.className = 'robot dir-'+(player.robot.config.Heading || 'indeterminent')
-					// TODO differentiate players
+					eRobot.className = 'robot dir-'+(player.robot.config.Heading || 'indeterminent') +
+						' robot-' + colors.map[player.name]
 					cell.appendChild(eRobot)
 				}
 				row.appendChild(cell)

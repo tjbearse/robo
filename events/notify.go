@@ -23,6 +23,7 @@ type NotifyAddPlayer struct {
 	Name string
 }
 type NotifyWelcome struct {
+	GameId GameId
 	Name string
 }
 

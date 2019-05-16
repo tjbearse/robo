@@ -1,12 +1,23 @@
-class Card {
+export interface Card {
 	Priority: number
 	Command: Command
 	Reps: number
 }
-class CardBack {
+export interface CardBack {
 }
 
-enum Command {
+export function newCard(Priority: number, Command : Command, Reps: number) : Card {
+	return {
+		Priority,
+		Command,
+		Reps
+	}
+}
+export function newCardBack() : CardBack {
+	return {}
+}
+
+export enum Command {
 	Forward = 0,
 	Backward = 1,
 	TurnLeft = 2,
@@ -14,6 +25,4 @@ enum Command {
 	UTurn = 4
 }
 
-type CardUpOrDown = Card | CardBack
-
-export {CardUpOrDown, CardBack, Card, Command}
+export type CardUpOrDown = Card | CardBack

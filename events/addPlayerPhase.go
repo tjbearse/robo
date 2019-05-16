@@ -45,7 +45,7 @@ func (j JoinGame) Exec(cc comm.CommClient) error {
 	g.UpdatePlayers(players)
 	c.SetGame(g)
 	c.SetPlayer(p)
-	c.Reply(NotifyWelcome{name})
+	c.Reply(NotifyWelcome{j.Game, name})
 	// fill in player on other existing players
 	for op := range(players) {
 		if op != p {

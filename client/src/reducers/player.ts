@@ -2,7 +2,7 @@ import { createReducer } from 'redux-starter-kit'
 
 import notify from '../actions/notify'
 import {Player, newPlayer} from '../types/player'
-import {CardBack} from '../types/card'
+import {newCardBack} from '../types/card'
 import {Dir} from '../types/coord'
 
 /*
@@ -16,7 +16,10 @@ const playersReducer = createReducer(
 	stripActionFluff({
 		[notify.AddPlayer]: ({players}, {Name}) => { players[Name] = newPlayer(Name) },
 		[notify.RemovePlayer]: ({players}, {Name}) => { delete players[Name] },
-		[notify.Welcome]: (state, {Name}) => { state.me = Name },
+		[notify.Welcome]: (state, {Name}) => ({
+			me: Name,
+			players: {},
+		}),
 
 		...onMe({
 			[notify.PromptWithHand]: (me, {Cards}) => { me.hand = Cards },
@@ -40,7 +43,7 @@ const playersReducer = createReducer(
 			[notify.RobotFell]: (p:Player, { Target }) => { p.robot.config = Target },
 
 			[notify.RandomBoardFill]: (p:Player, {BoardSlots}) => {
-				BoardSlots.forEach((i) => { p.board[i] = new CardBack() })
+				BoardSlots.forEach((i) => { p.board[i] = newCardBack() })
 			},
 
 			[notify.Cleanup]: (p:Player, { Board }) => {
