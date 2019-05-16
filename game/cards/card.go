@@ -3,37 +3,74 @@ package cards
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"math/rand"
 
 	"github.com/tjbearse/robo/game/coords"
 )
 
-// FIXME this deck is very simplified
-// there are some circumstance
-// when a card could be frozen for a long time on a
-// board that aren't accounted for
 type Deck struct {
 	cards []Card
-	pos int
+	// discard tracks both cards in play, i.e. out of deck,
+	// and those in the discard pile
+	// true denotes "out", false denotes the discard pile
+	discard map[Card]bool
 }
 
-func NewDeck(c []Card) *Deck {
-	return &Deck{c, 0}
-}
-
-func (d *Deck) Deal(n int) ([]Card) {
-	cards := make([]Card, 0, n)
-	for i:=0; i < n; i++ {
-		cards = append(cards, d.cards[d.pos])
-		d.pos = (d.pos + 1) % len(d.cards)
+func NewDeck(c []Card) (*Deck, error) {
+	// priorities could be overlapped even if cards aren't
+	// so we're gonna check for that
+	priorities := map[int]bool{}
+	discard := map[Card]bool{}
+	for _, card := range(c) {
+		if priorities[card.Priority] {
+			return nil, errors.New("Deck contains duplicate priorities")
+		}
+		priorities[card.Priority] = true
+		discard[card] = false // discard pile
 	}
-	return cards
+	// putting all cards in the discard ensures that the deck gets shuffled
+	return &Deck{[]Card{}, discard}, nil
+}
+
+func (d *Deck) Deal(n int) ([]Card, error) {
+	if len(d.cards) < n {
+		d.Shuffle()
+	}
+	if len(d.cards) < n {
+		return []Card{}, fmt.Errorf("can't deal desired cards: have %d, want %d", len(d.cards), n)
+	}
+	cards := d.cards[:n]
+	d.cards = d.cards[n:]
+
+	// add to discard
+	for _, card := range(cards) {
+		d.discard[card] = true
+	}
+	return cards, nil
 }
 
 func (d *Deck) Shuffle() {
-	d.pos = 0
+	// should always append cards to existing cards
+	fresh := make([]Card, 0, len(d.discard))
+	for c, inPlay := range(d.discard) {
+		if !inPlay {
+			fresh = append(fresh, c)
+		}
+	}
+	rand.Shuffle(len(fresh), func(i, j int) {
+		fresh[i], fresh[j] = fresh[j], fresh[i]
+	})
+	d.cards = append(d.cards, fresh...)
 }
 
-func (d *Deck) Discard(c Card) {
+func (d *Deck) Discard(c Card) (error) {
+	if !d.discard[c] {
+		return fmt.Errorf("card not listed as in play, %v", c)
+	}
+	d.discard[c] = false
+	return nil
 }
 
 
@@ -56,20 +93,20 @@ func CardCompare(a,b Card) bool {
 func (card Card) Apply(c coords.Configuration) []coords.Configuration {
 	steps := make([]coords.Configuration, 0)
 	switch card.Command {
-		case Forward:
+		case Move:
 			for i := 0; i < card.Reps; i++ {
 				c = c.ApplyDirectionaly(coords.Offset{0, 1})
 				steps = append(steps, c)
 			}
-		case Backward:
+		case BackUp:
 			for i := 0; i < card.Reps; i++ {
 				c = c.ApplyDirectionaly(coords.Offset{0, -1})
 				steps = append(steps, c)
 			}
-		case TurnLeft:
+		case RotateLeft:
 			c.Heading = c.Heading.RotateRight(-1)
 			steps = append(steps, c)
-		case TurnRight:
+		case RotateRight:
 			c.Heading = c.Heading.RotateRight(1)
 			steps = append(steps, c)
 		case UTurn:
@@ -81,10 +118,10 @@ func (card Card) Apply(c coords.Configuration) []coords.Configuration {
 
 type Command int
 const (
-	Forward Command = iota
-	Backward
-	TurnLeft
-	TurnRight
+	Move Command = iota
+	BackUp
+	RotateLeft
+	RotateRight
 	UTurn
 )
 var commandStr = map[Command]string{
@@ -92,18 +129,18 @@ var commandStr = map[Command]string{
 
 // credit: https://gist.github.com/lummie/7f5c237a17853c031a57277371528e87
 var toString = map[Command]string{
-	Forward: "Forward",
-	Backward: "Backward",
-	TurnLeft: "TurnLeft",
-	TurnRight: "TurnRight",
+	Move: "Move",
+	BackUp: "BackUp",
+	RotateLeft: "RotateLeft",
+	RotateRight: "RotateRight",
 	UTurn: "UTurn",
 }
 
 var toID = map[string]Command{
-	"Forward": Forward,
-	"Backward": Backward,
-	"TurnLeft": TurnLeft,
-	"TurnRight": TurnRight,
+	"Move": Move,
+	"BackUp": BackUp,
+	"RotateLeft": RotateLeft,
+	"RotateRight": RotateRight,
 	"UTurn": UTurn,
 }
 // MarshalJSON marshals the enum as a quoted json string

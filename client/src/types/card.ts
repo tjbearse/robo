@@ -18,11 +18,11 @@ export function newCardBack() : CardBack {
 }
 
 export enum Command {
-	Forward = 0,
-	Backward = 1,
-	TurnLeft = 2,
-	TurnRight = 3,
-	UTurn = 4
+	Move = 0,
+	BackUp,
+	RotateLeft,
+	RotateRight,
+	UTurn,
 }
 
 export type CardUpOrDown = Card | CardBack

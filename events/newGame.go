@@ -24,7 +24,10 @@ func (e NewGame) Exec(cc comm.CommClient) error {
 	if err != nil {
 		return err
 	}
-	deck := loader.GetDefaultDeck()
+	deck, err := loader.GetDefaultDeck()
+	if err != nil {
+		return err
+	}
 	g := game.NewGame(
 		*board,
 		*deck,

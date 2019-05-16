@@ -15,13 +15,18 @@ import (
 func StartCardsPhase (cc comm.CommClient) {
 	c, g, err := comm.WithGameContext(cc)
 	if err != nil {
-		return // TODO
+		c.Broadcast(g, ErrorReport{err.Error()})
+		return
 	}
 	hands := map[*game.Player][]cards.Card{}
 	players := g.GetPlayers()
 	for p := range(players) {
 		if p.Robot.Lives > 0 {
-			cards := g.Deck.Deal(HandSize - p.Robot.Damage)
+			cards, err := g.Deck.Deal(HandSize - p.Robot.Damage)
+			if err != nil {
+				c.Broadcast(g, ErrorReport{err.Error()})
+				return
+			}
 			hands[p] = cards
 			// TODO add info for num cards of others?
 			prompt := PromptWithHand{hands[p]}
