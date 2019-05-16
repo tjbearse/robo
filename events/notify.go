@@ -33,6 +33,7 @@ const (
 	Spawned MoveReason = "spawned"
 	Moved = "moved"
 	Bumped = "bumped"
+	Conveyed = "conveyed"
 )
 
 type NotifyRobotMoved struct {

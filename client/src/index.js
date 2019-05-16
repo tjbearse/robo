@@ -144,6 +144,7 @@ function drawCrappyVersion(state) {
 		// robot board
 		let eBoard = document.createElement('ol')
 		eBoard.id = 'robot-board'
+		eHand.start = '0'
 		for (let i=0; i < 5; i++) {
 			let eSlot;
 			if (myPlayer.board[i]) {
