@@ -129,7 +129,23 @@ func attemptMove(c comm.ExtendedCommClient, g *game.Game, loc coords.Coord, p *g
 
 func moveConveyors(c comm.ExtendedCommClient, g *game.Game) {
 	// move Express Conveyors
+	/*
+	for p := range(g.GetPlayers()) {
+		if (p.Robot.Configuration != nil) {
+			coord := p.Robot.Configuration.Location
+			tile, err := g.Board.GetTile(coord)
+			if err != nil {
+				continue
+			}
+			if tile.Type == game.ExpressConveyor {
+				// resolveConveyorMove(c, g, p, tile.Dir)
+			}
+		}
+	}
 	// move all conveyors
+	for p := range(g.GetPlayers()) {
+	}
+	*/
 }
 
 // TODO pushersPush

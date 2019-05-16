@@ -9,40 +9,36 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gobuffalo/packr"
 )
 
-const usePackr = false
 
 type server struct {
 	Addr string
+	Bridge Bridge
+	FS http.FileSystem
 }
 
-func NewServer(addr string) (server) {
+func NewServer(addr string, bridge Bridge, fs http.FileSystem) (server) {
 	if (addr == "") {
 		addr = ":8080"
 	}
 	return server{
 		addr,
+		bridge,
+		fs,
 	}
 }
 
-var fs http.FileSystem
 var startTime = time.Now()
 
 func init() {
-	if usePackr {
-		fs = packr.NewBox("../client/dist")
-	} else {
-		fs = http.Dir("./client/dist")
-	}
 }
 
-func (s *server) Serve(b Bridge) {
-	hub := newHub(b)
+func (s *server) Serve() {
+	hub := newHub(s.Bridge)
 	go hub.run()
 
-	http.Handle("/", http.FileServer(fs))
+	http.Handle("/", http.FileServer(s.FS))
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)

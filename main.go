@@ -1,15 +1,19 @@
 package main
 
 import (
+	"net/http"
+
+	"github.com/tjbearse/robo/bridge"
 	"github.com/tjbearse/robo/events"
 	"github.com/tjbearse/robo/websockets"
-	"github.com/tjbearse/robo/bridge"
 )
 
+
 func main () {
-	server := websockets.NewServer("")
+	var fs http.FileSystem = http.Dir("client/dist")
 
 	bridge := bridge.NewBridge(events.EventMap)
 
-	server.Serve(&bridge)
+	server := websockets.NewServer("", &bridge, fs)
+	server.Serve()
 }

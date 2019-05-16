@@ -18,6 +18,7 @@ const (
 	Conveyor
 	ExpressConveyor
 	Pusher
+	Gear // TODO this needs some more context re: direction
 	Laser
 )
 

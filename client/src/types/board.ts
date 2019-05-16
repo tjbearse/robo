@@ -24,6 +24,7 @@ export enum TileType {
 	Conveyor,
 	ExpressConveyor,
 	Pusher,
+	Gear,
 	Laser,
 }
 
