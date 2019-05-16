@@ -3,6 +3,7 @@ package events
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 
 	"github.com/tjbearse/robo/game"
 	"github.com/tjbearse/robo/game/cards"
@@ -125,15 +126,13 @@ func (e CommitCards) Exec(cc comm.CommClient) error {
 	if !ok {
 		return wrongPhaseError
 	}
-	// TODO check if actually played cards
 	if ph.Ready[p] == true {
 		return errors.New("Already ready")
 	}
 	ph.Ready[p] = true
+
+	fillBoardEmptyHand(c, g, p, ph)
 	c.Broadcast(g, NotifyPlayerReady{p.Name})
-	for _, card := range(ph.Hands[p]) {
-		g.Deck.Discard(card)
-	}
 
 	for _, ready := range(ph.Ready) {
 		if !ready {
@@ -143,4 +142,35 @@ func (e CommitCards) Exec(cc comm.CommClient) error {
 	// all ready
 	StartSimulationPhase(cc)
 	return nil
+}
+
+func fillBoardEmptyHand(c comm.ExtendedCommClient, g *game.Game, p *game.Player, ph *PlayCardsPhase) {
+	short := 0
+	for _, slot := range(p.Robot.Board) {
+		if slot == nil {
+			short++
+		}
+	}
+	hand := ph.Hands[p]
+	if short != 0 {
+		rand.Shuffle(len(hand), func(i, j int) {
+			hand[i], hand[j] = hand[j], hand[i]
+		})
+
+		filled := make([]uint, short)
+		i := 0
+		for slot, slotV := range(p.Robot.Board) {
+			if slotV == nil {
+				p.Robot.Board[slot] = &hand[i]
+				filled[i] = uint(slot)
+				i++
+			}
+		}
+		ph.Hands[p] = hand[i:]
+		c.Broadcast(g, NotifyRandomBoardFill{p.Name, filled})
+	}
+
+	for _, card := range(ph.Hands[p]) {
+		g.Deck.Discard(card)
+	}
 }

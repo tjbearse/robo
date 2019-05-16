@@ -36,14 +36,14 @@ func GetDefaultBoard() (*Board, error) {
 	pb.FlagOrder = []Coord{{2,4}}
 
 	spawns := []Configuration{
-		{Coord{1,0},West},
-		{Coord{0,1},West},
-		{Coord{0,2},West},
-		{Coord{0,3},West},
-		{Coord{0,4},West},
-		{Coord{0,5},West},
-		{Coord{0,6},West},
-		{Coord{0,7},West},
+		{Coord{3,4},East},
+		{Coord{0,1},East},
+		{Coord{0,2},East},
+		{Coord{0,3},East},
+		{Coord{0,4},East},
+		{Coord{0,5},East},
+		{Coord{0,6},East},
+		{Coord{0,7},East},
 	}
 	return NewBoard(pb, spawns)
 }

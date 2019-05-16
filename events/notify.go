@@ -88,6 +88,11 @@ type NotifyCardToBoardBlind struct {
 	BoardSlot uint
 }
 
+type NotifyRandomBoardFill struct {
+	Player string
+	BoardSlots []uint
+}
+
 type NotifyCardToHandBlind struct {
 	Player string
 	BoardSlot uint

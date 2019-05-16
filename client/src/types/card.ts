@@ -3,6 +3,8 @@ class Card {
 	Command: Command
 	Reps: number
 }
+class CardBack {
+}
 
 enum Command {
 	Forward = 0,
@@ -12,4 +14,6 @@ enum Command {
 	UTurn = 4
 }
 
-export {Card, Command}
+type CardUpOrDown = Card | CardBack
+
+export {CardUpOrDown, CardBack, Card, Command}

@@ -20,6 +20,7 @@ enum Notifications {
 	CardToBoardBlind = 'NotifyCardToBoardBlind',
 	CardToHand = 'NotifyCardToHand',
 	CardToHandBlind = 'NotifyCardToHandBlind',
+	RandomBoardFill = 'NotifyRandomBoardFill',
 	RevealCard = 'NotifyRevealCard',
 	PlayerReady = 'NotifyPlayerReady',
 	Cleanup = 'NotifyCleanup',

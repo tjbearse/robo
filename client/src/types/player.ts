@@ -1,11 +1,11 @@
-import {Card} from './card'
+import {CardUpOrDown, Card} from './card'
 import {Coord, Config} from './coord'
 
 export interface Player {
 	name: string
 	robot: Robot
-	hand: Card[]
-	board: { [i: number]: Card } // TODO flipped card
+	hand: CardUpOrDown[]
+	board: { [i: number]: CardUpOrDown }
 	flagNum: number
 	spawn: Coord
 }

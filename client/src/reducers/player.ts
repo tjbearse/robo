@@ -2,6 +2,7 @@ import { createReducer } from 'redux-starter-kit'
 
 import notify from '../actions/notify'
 import {Player, newPlayer} from '../types/player'
+import {CardBack} from '../types/card'
 import {Dir} from '../types/coord'
 
 /*
@@ -38,6 +39,10 @@ const playersReducer = createReducer(
 			[notify.RobotMoved]: (p:Player, {NewConfig}) => { p.robot.config = NewConfig },
 			[notify.RobotFell]: (p:Player, { Target }) => { p.robot.config = Target },
 
+			[notify.RandomBoardFill]: (p:Player, {BoardSlots}) => {
+				BoardSlots.forEach((i) => { p.board[i] = new CardBack() })
+			},
+
 			[notify.Cleanup]: (p:Player, { Board }) => {
 				p.board = {}
 				Board.forEach((c, i) => {
@@ -47,10 +52,12 @@ const playersReducer = createReducer(
 				})
 			},
 			/*
+			  TODO
 			  FlagTouched = 'NotifyFlagTouched',
+			  PlayerFinished
+
 
 			  PlayerReady = 'NotifyPlayerReady',
-
 			  //not me
 			  CardToBoardBlind = 'NotifyCardToBoardBlind',
 			  CardToHandBlind = 'NotifyCardToHandBlind',
