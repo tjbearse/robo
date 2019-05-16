@@ -1,6 +1,8 @@
 import store from "./store"
 import {Walls, TileType} from "./types/board"
 import './game.css'
+import {conn, init} from './websocket'
+import * as uiActions from './uiActions'
 
 // This file is mostly temporary stuff while I work on data store
 
@@ -8,17 +10,32 @@ console.log(store.getState())
 const unsubscribe = store.subscribe(() => console.log(store.getState()))
 
 window.onload = windowOnLoad
-var conn;
 // crappy player api :)
 Object.assign(window, {
-	sendEvent,
-	sendCard,
-	retrieveCard,
-	setSpawn,
+	...uiActions
 })
 
 // --
 
+function windowOnLoad() {
+	init()
+	conn.onmessage = handleMessage
+
+	drawCrappyVersion(store.getState())
+	const unsubscribeDraw = store.subscribe(() => drawCrappyVersion(store.getState()))
+
+	document.getElementById("form").onsubmit = submitForm
+};
+
+function handleMessage(evt) {
+	let messages = evt.data.split('\n');
+	for (let i = 0; i < messages.length; i++) {
+		let json = JSON.parse(messages[i])
+		let type = json.Type
+		let payload = json.Msg
+		store.dispatch({type, payload})
+	}
+}
 function drawCrappyVersion(state) {
 	const {
 		players: {me, players},
@@ -153,108 +170,31 @@ function drawCrappyVersion(state) {
 
 }
 
-function dispatchAction(wsFormat) {
-	let action = {
-		type: wsFormat.Type,
-		payload: wsFormat.Msg
-	}
-	store.dispatch(action)
-}
-
-function sendEvent(Type, Msg) {
-	conn.send(JSON.stringify({ Type, Msg }));
-}
-function sendCard() {
-	let HandOffset = +document.getElementById('cardslot').value
-	let BoardSlot = +document.getElementById('boardslot').value
-	sendEvent('CardToBoard', {
-		HandOffset,
-		BoardSlot,
-	})
-}
-function retrieveCard() {
-	let HandOffset = +document.getElementById('cardslot').value
-	let BoardSlot = +document.getElementById('boardslot').value
-	sendEvent('CardToHand', {
-		HandOffset,
-		BoardSlot,
-	})
-}
-function setSpawn() {
-	var e = document.getElementById("spawnHeading");
-	var heading = e.options[e.selectedIndex].text;
-	sendEvent('SetSpawnHeading', { 'Dir': heading })
-}
-
-function windowOnLoad() {
+function submitForm() {
 	var msg = document.getElementById("Msg");
 	var type = document.getElementById("Type");
-	var log = document.getElementById("log");
 
-	drawCrappyVersion(store.getState())
-	const unsubscribeDraw = store.subscribe(() => drawCrappyVersion(store.getState()))
-
-	document.getElementById("form").onsubmit = function () {
-		if (!conn) {
-			return false;
-		}
-		if (!msg.value) {
-			return false;
-		}
-		if (!type.value) {
-			return false;
-		}
-		try {
-			var msgV = JSON.parse(msg.value)
-			var envelope = {
-				Type: type.value,
-				Msg: msgV
-			};
-			conn.send(JSON.stringify(envelope));
-			msg.value = "";
-			type.value = "";
-			return false;
-		} catch {
-			return false;
-		}
-	};
-
-	if (window["WebSocket"]) {
-		let protocol = "ws://"
-		if (document.location.protocol === 'https:') {
-			protocol = "wss://"
-		}
-		conn = new WebSocket(protocol + document.location.host + document.location.pathname + "ws");
-		conn.onclose = function (evt) {
-			var item = document.createElement("div");
-			item.innerHTML = "<b>Connection closed.</b>";
-			appendLog(item);
-		};
-		conn.onmessage = function (evt) {
-			var messages = evt.data.split('\n');
-			for (var i = 0; i < messages.length; i++) {
-				var json = JSON.parse(messages[i])
-				dispatchAction(json)
-				var txt = JSON.stringify(json, null, 4)
-				var item = document.createElement("pre");
-				item.innerText = txt;
-				appendLog(item);
-			}
-		};
-	} else {
-		var item = document.createElement("div");
-		item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-		appendLog(item);
+	if (!conn) {
+		return false;
 	}
-	return
-	// --
-
-	function appendLog(item) {
-		var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-		log.appendChild(item);
-		if (doScroll) {
-			log.scrollTop = log.scrollHeight - log.clientHeight;
-		}
+	if (!msg.value) {
+		return false;
 	}
+	if (!type.value) {
+		return false;
+	}
+	try {
+		var msgV = JSON.parse(msg.value)
+		var envelope = {
+			Type: type.value,
+			Msg: msgV
+		};
+		conn.send(JSON.stringify(envelope));
+		msg.value = "";
+		type.value = "";
+	} catch {
+		return false;
+	}
+	return false;
 };
 

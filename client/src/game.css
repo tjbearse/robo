@@ -10,12 +10,6 @@ body {
     background: gray;
 }
 
-#messages {
-	width: 25%;
-	height: 100%;
-	position: relative;
-	float: left;
-}
 #gameArea {
 	width: 50%;
 	height: 100%;
@@ -128,25 +122,9 @@ body {
 	background: url(./sprites.svg) -100px -100px;
 }
 
-#log {
-	background: white;
-    margin: 0;
-    padding: 0.5em 0.5em 0.5em 0.5em;
-    position: absolute;
-    top: 0.5em;
-    left: 0.5em;
-    right: 0.5em;
-    bottom: 3em;
-    overflow: auto;
+#helperBtns, #helperBtns * {
+	margin: 4px;
 }
-
-#form {
-    padding: 0 0.5em 0 0.5em;
-    margin: 0;
-    position: absolute;
-    bottom: 1em;
-    left: 0px;
-    width: 100%;
-    overflow: hidden;
+#cardslot, #boardslot {
+	width: 45px;
 }
-

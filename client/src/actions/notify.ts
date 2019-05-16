@@ -26,6 +26,7 @@ enum Notifications {
 
 	// uncat
 	Board = 'NotifyBoard',
+	NewGame = 'NotifyNewGame',
 }
 
 export default Notifications
