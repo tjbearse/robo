@@ -1,6 +1,7 @@
 package events
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/tjbearse/robo/events/comm"
@@ -30,6 +31,9 @@ func (j JoinGame) Exec(cc comm.CommClient) error {
 		return fmt.Errorf("game (%s) doesn't exist", j.Game)
 	}
 
+	if j.PlayerName == "" {
+		return errors.New("name cannot be empty")
+	}
 	name := j.PlayerName
 	players := g.GetPlayers()
 	for p := range(players) {
