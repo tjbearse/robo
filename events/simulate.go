@@ -15,17 +15,24 @@ func StartSimulationPhase(cc comm.CommClient) {
 		return // TODO
 	}
 	g.ChangePhase(&SimulationPhase{})
-	runTurn(c,g)
+	over := runRegisters(c,g)
+	if over {
+		return
+	}
 	StartSpawnPhase(cc)
 }
 
 type SimulationPhase struct {}
 
-func runTurn(c comm.ExtendedCommClient, g *game.Game) {
+func runRegisters(c comm.ExtendedCommClient, g *game.Game) (gameOver bool) {
 	for reg:=0; reg < Steps; reg++ {
-		runRegister(c, g, reg)
+		over := runRegister(c, g, reg)
+		if over {
+			return true
+		}
 	}
 	cleanup(c, g)
+	return false
 }
 
 type commandPair struct {
@@ -33,7 +40,7 @@ type commandPair struct {
 	Card cards.Card
 }
 
-func runRegister(c comm.ExtendedCommClient, g *game.Game, reg int) {
+func runRegister(c comm.ExtendedCommClient, g *game.Game, reg int) (gameOver bool) {
 	// Flip Cards
 	commands := flipCards(g, reg)
 	for _, command := range(commands) {
@@ -49,7 +56,7 @@ func runRegister(c comm.ExtendedCommClient, g *game.Game, reg int) {
 	pushersPush(c, g, reg)
 	gearsRotate(c, g)
 	fireLasers(c, g, reg)
-	touchCheckpoints(c, g)
+	return touchCheckpoints(c, g)
 }
 
 func flipCards(g *game.Game, round int) []commandPair {
@@ -139,7 +146,7 @@ func gearsRotate(c comm.ExtendedCommClient, g *game.Game) {
 func fireLasers(c comm.ExtendedCommClient, g *game.Game, reg int) {
 }
 
-func touchCheckpoints(c comm.ExtendedCommClient, g *game.Game) {
+func touchCheckpoints(c comm.ExtendedCommClient, g *game.Game) (gameOver bool) {
 	players := g.GetPlayers()
 	for p, _ := range(players) {
 		if p.Robot.Configuration != nil {
@@ -170,10 +177,12 @@ func touchCheckpoints(c comm.ExtendedCommClient, g *game.Game) {
 
 				if p.FlagNum == g.Board.GetNumFlags() {
 					StartGameWon(c.CommClient, p)
+					return true
 				}
 			}
 		}
 	}
+	return false
 }
 
 func cleanup(c comm.ExtendedCommClient, g *game.Game) {

@@ -20,12 +20,24 @@ export default function drawCrappyVersion(state) {
 	if (myPlayer) {
 		e.appendChild(drawMyHandAndBoard(myPlayer))
 	}
+	if (uiInfo.winner) {
+		e.appendChild(drawGameOver(uiInfo.winner))
+	}
 
 	let old = document.getElementById('gameArea')
 	old.parentNode.replaceChild(e, old);
 	return
 
 	// --
+
+	function drawGameOver(winner) {
+		let span = document.createElement('span')
+		span.innerText = winner + ' won!'
+		let e = document.createElement('div')
+		e.appendChild(span)
+		e.id = 'gameOver'
+		return e
+	}
 
 	function drawCrappyBoard(board, players, { colors }){
 		let eBoard = document.createElement('table')
@@ -113,7 +125,7 @@ export default function drawCrappyVersion(state) {
 		// robot board
 		let eBoard = document.createElement('ol')
 		eBoard.id = 'robot-board'
-		eHand.start = '0'
+		eBoard.start = '0'
 		for (let i=0; i < 5; i++) {
 			let eSlot;
 			if (myPlayer.board[i]) {

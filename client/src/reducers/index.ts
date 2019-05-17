@@ -25,13 +25,19 @@ const gameInfoReducer = createReducer({
   PromptForSpawn = 'PromptForSpawn',
 */
 
-const uiInfoReducer = createReducer({
+const initialState = {
 	colors: {map: {}, count: 0},
-}, {
+	winner: ''
+}
+const uiInfoReducer = createReducer(initialState, {
 	[notify.AddPlayer]: (state, {payload: {Name}}) => {
 		state.colors.map[Name] = state.colors.count
 		state.colors.count++
 	},
+	[notify.PlayerFinished]: (state, {payload: {Player}}) => {
+		state.winner = Player
+	},
+	[notify.Welcome]: (state, {Name}) => initialState,
 })
 
 // root

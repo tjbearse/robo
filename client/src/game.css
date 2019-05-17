@@ -15,6 +15,29 @@ body {
 	height: 100%;
 	float: left;
 }
+
+#gameOver {
+	position: absolute;
+    top: 40%;
+    bottom: 40%;
+    left: -10px;
+    right: -10px;
+    background: white;
+    text-align: center;
+    font-size: 72px;
+	animation-name: wobble;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+}
+#gameOver span {
+    vertical-align: middle;
+}
+@keyframes wobble {
+	0% { transform: rotate(-4deg); }
+	50% { transform: rotate(4deg); }
+	100% { transform: rotate(-4deg); }
+}
+
 #playArea {
 	margin: 8px;
 	float: left;
@@ -107,7 +130,6 @@ body {
 	animation-duration: 4s;
 	animation-iteration-count: infinite;
 }
-/* The animation code */
 @keyframes spin {
 	0% { transform: rotate(0deg); }
 	25% { transform: rotate(90deg); }
