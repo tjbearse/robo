@@ -44,7 +44,7 @@ type NotifyRobotMoved struct {
 	NewConfig coords.Configuration
 }
 
-// TODO is there a better way to identify, e.g. a typed ID?
+// TODO is there a better way to identify players, e.g. a typed ID?
 type NotifyRobotFell struct {
 	Player string
 	Reason MoveReason
@@ -108,4 +108,24 @@ type NotifyCleanup struct {
 // FIXME too generic
 type NotifyPlayerReady struct {
 	Player string
+}
+
+type Ray struct {
+	Start coords.Coord
+	StartPlayer string
+	End coords.Coord
+	EndPlayer string
+}
+type NotifyLaserFire struct {
+	Rays []Ray
+}
+
+type NotifyDamage struct {
+	Player string
+	NewTotal int
+}
+
+type NotifyLifeLoss struct {
+	Player string
+	NewTotal int
 }

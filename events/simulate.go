@@ -142,10 +142,6 @@ func pushersPush(c comm.ExtendedCommClient, g *game.Game, reg int) {
 func gearsRotate(c comm.ExtendedCommClient, g *game.Game) {
 }
 
-// TODO lasers fire
-func fireLasers(c comm.ExtendedCommClient, g *game.Game, reg int) {
-}
-
 func touchCheckpoints(c comm.ExtendedCommClient, g *game.Game) (gameOver bool) {
 	players := g.GetPlayers()
 	for p, _ := range(players) {
@@ -206,6 +202,7 @@ func cleanup(c comm.ExtendedCommClient, g *game.Game) {
 	}
 }
 
+// TODO need to also message loss of a life
 func executeRobotFall(p *game.Player, target coords.Configuration, reason MoveReason) NotifyRobotFell {
 	r := &p.Robot
 	r.Lives--

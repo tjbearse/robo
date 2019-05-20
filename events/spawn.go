@@ -23,7 +23,7 @@ func StartSpawnPhase(cc comm.CommClient) {
 	for p := range(g.GetPlayers()) {
 		// who is not on the board?
 		if p.Robot.Configuration == nil {
-			// FIXME all spawns after the first get 2 damage
+			// FIXME don't spawn if dead
 			switch p.Spawn.State {
 			case game.Unset:
 				config, err := g.GetNextSpawn()
@@ -35,6 +35,7 @@ func StartSpawnPhase(cc comm.CommClient) {
 				c.Broadcast(g, NotifySpawnUpdate{p.Name, config.Location})
 				c.Broadcast(g, executeSpawn(p, config))
 			case game.Rotatable:
+				// FIXME all spawns after the first get 2 damage
 				loc := p.Spawn.Coord
 				prompt := PromptForSpawn{p.Name, loc}
 				c.MessagePlayer(p, prompt)

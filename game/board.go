@@ -174,3 +174,6 @@ func (b *Board) getNextSpawn() (coords.Configuration, error) {
 	return c, nil
 }
 
+func (b *Board) GetLasers() []coords.Coord {
+	return b.lasers
+}
