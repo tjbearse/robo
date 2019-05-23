@@ -1,6 +1,9 @@
 package events
 
 import (
+	"os"
+	"bufio"
+	
 	"github.com/tjbearse/robo/game"
 	"github.com/tjbearse/robo/events/comm"
 	"github.com/tjbearse/robo/game/loader"
@@ -20,7 +23,11 @@ func (e NewGame) Exec(cc comm.CommClient) error {
 
 	// TODO better id schema
 	id := GameId(len(gameStore))
-	board, err := loader.GetDefaultBoard()
+    f, err := os.Open("./content/boards/riskyExchange.txt") // FIXME this doesn't belong here
+	if err != nil {
+		return err
+	}
+	board, err := loader.GetBoard(bufio.NewReader(f))
 	if err != nil {
 		return err
 	}

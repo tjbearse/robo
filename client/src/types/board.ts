@@ -20,6 +20,7 @@ export enum TileType {
 	Repair,
 	Upgrade,
 	Flag,
+	Spawn,
 
 	Conveyor,
 	ExpressConveyor,

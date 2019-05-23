@@ -14,6 +14,7 @@ const (
 	Repair
 	Upgrade
 	Flag
+	Spawn
 
 	Conveyor
 	ExpressConveyor
@@ -84,8 +85,8 @@ func NewBoard(plain PlainBoard, spawns []coords.Configuration) (*Board, error) {
 			return nil, errors.New("Spawn out of range")
 		}
 		tile, _ := board.GetTile(spawn.Location)
-		if tile.Type != Floor {
-			return nil, errors.New("Spawn must be a floor")
+		if tile.Type != Spawn {
+			return nil, errors.New("Spawn must be a spawn Tile")
 		}
 	}
 	return &board, nil

@@ -44,7 +44,7 @@ func (j JoinGame) Exec(cc comm.CommClient) error {
 
 	board := make([]*cards.Card, Steps)
 	r := game.Robot{0, RobotMaxLives, board, nil}
-	p := &game.Player{name, r, game.Spawn{}, 0}
+	p := &game.Player{name, r, game.SpawnSetting{}, 0}
 	players[p] = true
 	g.UpdatePlayers(players)
 	c.SetGame(g)

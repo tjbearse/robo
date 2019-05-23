@@ -53,7 +53,7 @@ func (g *Game) CheckForRobot(c coords.Coord) *Player {
 type Player struct {
 	Name string
 	Robot Robot
-	Spawn Spawn
+	Spawn SpawnSetting
 	FlagNum int // i.e. the flag currently targetting
 }
 
@@ -69,7 +69,7 @@ const (
 	Unset SpawnState = iota
 	Rotatable
 )
-type Spawn struct {
+type SpawnSetting struct {
 	State SpawnState
 	Coord coords.Coord
 }
