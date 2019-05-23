@@ -44,7 +44,6 @@ body {
 }
 
 #board {
-	background: white;
 	border-collapse: collapse;
 	float:left;
 }
@@ -79,52 +78,63 @@ body {
 	border-left-style: solid;
 }
 
-#board td.tile-Floor {
+#board td.tile::before {
+	content: "";
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	z-index: -1;
+}
+#board td.tile-Floor::before {
 	background: url(./sprites.svg) 0 0;
 }
-#board td.tile-Pit {
+#board td.tile-Pit::before {
 	background: url(./sprites.svg) -50px 0;
 }
-#board td.tile-Repair {
+#board td.tile-Repair::before {
 	background: url(./sprites.svg) -100px 0;
 }
-#board td.tile-Upgrade {
+#board td.tile-Upgrade::before {
 	background: url(./sprites.svg) -150px 0;
 }
-#board td.tile-Flag {
+#board td.tile-Flag::before {
 	background: url(./sprites.svg) 0px -50px;
 }
 /* curved belts? */
-#board td.tile-Conveyor {
+#board td.tile-Conveyor::before {
 	background: url(./sprites.svg) -50px -50px;
 }
-#board td.tile-ExpressConveyor {
+#board td.tile-ExpressConveyor::before {
 	background: url(./sprites.svg) -100px -50px;
 }
-#board td.tile-Pusher {
+#board td.tile-Pusher::before {
 	background: url(./sprites.svg) -150px -50px;
 }
-#board td.tile-Laser {
+#board td.tile-Laser::before {
 	background: url(./sprites.svg) -0px -100px;
 }
-#board td.tile-Laser {
-	background: url(./sprites.svg) -0px -100px;
+#board td.tile-Gear::before {
+	background: url(./sprites.svg) -50px -100px;
 }
-#board td.tile-OffMap {
+#board td.tile-OffMap::before {
 	background: #222;
 }
 
-.dir-North {}
-.dir-East {
+td.tile-Gear.dir-South::before, td.tile-Gear.dir-East::before, td.tile-Gear.dir-West::before {
+	transform: scaleX(-1)
+}
+.tile.dir-East::before, .robot.dir-East {
 	transform: rotate(90deg);
 }
-.dir-West {
+.tile.dir-West::before, .robot.dir-West {
 	transform: rotate(270deg);
 }
-.dir-South {
+.tile.dir-South::before, .robot.dir-South {
 	transform: rotate(180deg);
 }
-.dir-indeterminent {
+.robot.dir-indeterminent {
 	transform: rotate(180deg);
 	animation-name: spin;
 	animation-duration: 4s;
@@ -141,6 +151,7 @@ body {
 .robot {
 	width: 50px;
 	height: 50px;
+	z-index: 10;
 	background: url(./sprites.svg) -150px -200px;
 }
 .robot.robot-0 {
