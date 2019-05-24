@@ -188,3 +188,7 @@ td.tile-Gear.dir-South::before, td.tile-Gear.dir-East::before, td.tile-Gear.dir-
 #cardslot, #boardslot {
 	width: 45px;
 }
+
+#error {
+	background: red;
+}

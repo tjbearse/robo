@@ -1,4 +1,5 @@
 import {Walls, TileType} from "./types/board"
+import {ClearError} from './actions/playerActions'
 
 export default function drawCrappyVersion(state) {
 	const {
@@ -15,6 +16,9 @@ export default function drawCrappyVersion(state) {
 	let eGameId = document.createElement('div')
 	eGameId.innerText = 'GameId: ' + gameInfo.id
 	e.appendChild(eGameId)
+	if (uiInfo.error) {
+		e.appendChild(drawError(uiInfo.error))
+	}
 	
 	e.appendChild(drawCrappyBoard(board, players, uiInfo))
 	if (myPlayer) {
@@ -23,6 +27,7 @@ export default function drawCrappyVersion(state) {
 	if (uiInfo.winner) {
 		e.appendChild(drawGameOver(uiInfo.winner))
 	}
+
 
 	let old = document.getElementById('gameArea')
 	old.parentNode.replaceChild(e, old);
@@ -37,6 +42,14 @@ export default function drawCrappyVersion(state) {
 		e.appendChild(span)
 		e.id = 'gameOver'
 		return e
+	}
+
+	function drawError(e) {
+		let eError = document.createElement('div')
+		eError.id='error'
+		eError.innerText = uiInfo.error
+		eError.onclick = function() { ClearError() }
+		return eError
 	}
 
 	function drawCrappyBoard(board, players, { colors }){
