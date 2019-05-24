@@ -61,8 +61,8 @@ body {
 	position: absolute;
 	top: 0;
 	left: 0;
-	border-width: 8px;
-	border-color: grey;
+	border-width: 4px;
+	border-color: #d4aa00;
 	box-sizing: border-box;
 }
 #board td .wall-North {
