@@ -138,43 +138,65 @@ func attemptMove(c comm.ExtendedCommClient, g *game.Game, loc coords.Coord, p *g
 func pushersPush(c comm.ExtendedCommClient, g *game.Game, reg int) {
 }
 
-// TODO gearsRotate
 func gearsRotate(c comm.ExtendedCommClient, g *game.Game) {
+	players := g.GetPlayers()
+	for p, _ := range(players) {
+		if p.Robot.Configuration == nil {
+			continue
+		}
+		r := p.Robot
+		loc := r.Configuration.Location
+		tile, err := g.Board.GetTile(loc)
+		if err != nil {
+			continue
+		}
+		if tile.Type == game.Gear {
+			target := *r.Configuration
+			if tile.Dir == coords.North {
+				target.Heading = target.Heading.RotateRight(1)
+			} else {
+				target.Heading = target.Heading.RotateRight(-1)
+			}
+			c.Broadcast(g, NotifyRobotMoved{p.Name, Gear, *r.Configuration, target})
+			*r.Configuration = target
+		}
+	}
 }
 
 func touchCheckpoints(c comm.ExtendedCommClient, g *game.Game) (gameOver bool) {
 	players := g.GetPlayers()
 	for p, _ := range(players) {
-		if p.Robot.Configuration != nil {
-			loc := p.Robot.Configuration.Location
-			tile, err := g.Board.GetTile(loc)
-			if err != nil {
-				// TODO debug logging
-				continue
-			}
-			// touching for spawn point
-			if tile.Type == game.Repair ||
-				tile.Type == game.Flag ||
-				tile.Type == game.Upgrade {
-				c.Broadcast(g, NotifySpawnUpdate{p.Name, loc})
-				p.Spawn.State = game.Rotatable
-				p.Spawn.Coord = loc
-			}
+		if p.Robot.Configuration == nil {
+			continue
+		}
+		loc := p.Robot.Configuration.Location
+		tile, err := g.Board.GetTile(loc)
+		if err != nil {
+			// TODO debug logging
+			continue
+		}
+		// touching for spawn point
+		if tile.Type == game.Repair ||
+			tile.Type == game.Flag ||
+			tile.Type == game.Upgrade {
+			c.Broadcast(g, NotifySpawnUpdate{p.Name, loc})
+			p.Spawn.State = game.Rotatable
+			p.Spawn.Coord = loc
+		}
 
-			// touching next flag
-			nextFlag, err := g.Board.GetFlag(p.FlagNum)
-			if err != nil {
-				// TODO debug logging
-				continue
-			}
-			if tile.Type == game.Flag && loc == nextFlag {
-				c.Broadcast(g, NotifyFlagTouched{p.Name, p.FlagNum})
-				p.FlagNum++
+		// touching next flag
+		nextFlag, err := g.Board.GetFlag(p.FlagNum)
+		if err != nil {
+			// TODO debug logging
+			continue
+		}
+		if tile.Type == game.Flag && loc == nextFlag {
+			c.Broadcast(g, NotifyFlagTouched{p.Name, p.FlagNum})
+			p.FlagNum++
 
-				if p.FlagNum == g.Board.GetNumFlags() {
-					StartGameWon(c.CommClient, p)
-					return true
-				}
+			if p.FlagNum == g.Board.GetNumFlags() {
+				StartGameWon(c.CommClient, p)
+				return true
 			}
 		}
 	}
@@ -182,10 +204,38 @@ func touchCheckpoints(c comm.ExtendedCommClient, g *game.Game) (gameOver bool) {
 }
 
 func cleanup(c comm.ExtendedCommClient, g *game.Game) {
-	// TODO Repairs & Upgrades
+	// Repairs & Upgrades
+	// TODO upgrades
+	players := g.GetPlayers()
+	for p, _ := range(players) {
+		if p.Robot.Configuration == nil {
+			continue
+		}
+		loc := p.Robot.Configuration.Location
+		tile, err := g.Board.GetTile(loc)
+		if err != nil {
+			// TODO debug logging
+			continue
+		}
+		switch tile.Type {
+			case game.Repair:
+			if p.Robot.Damage != 0 {
+				p.Robot.Damage--
+				c.Broadcast(g, NotifyHeal{p.Name, p.Robot.Damage})
+			}
+			case game.Upgrade:
+			if p.Robot.Damage != 0 {
+				p.Robot.Damage--
+				if p.Robot.Damage != 0 {
+					p.Robot.Damage--
+				}
+				c.Broadcast(g, NotifyHeal{p.Name, p.Robot.Damage})
+			}
+			case game.Flag:
+		}
+	}
 
 	// Wiping Registers
-	players := g.GetPlayers()
 	for p := range(players) {
 		unlockedNum := HandSize - p.Robot.Damage
 		if unlockedNum > Steps {

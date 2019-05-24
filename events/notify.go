@@ -35,6 +35,7 @@ const (
 	Moved = "moved"
 	Bumped = "bumped"
 	Conveyed = "conveyed"
+	Gear = "gear"
 )
 
 type NotifyRobotMoved struct {
@@ -121,6 +122,11 @@ type NotifyLaserFire struct {
 }
 
 type NotifyDamage struct {
+	Player string
+	NewTotal int
+}
+
+type NotifyHeal struct {
 	Player string
 	NewTotal int
 }
