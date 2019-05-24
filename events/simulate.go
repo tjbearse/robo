@@ -103,7 +103,7 @@ func attemptMove(c comm.ExtendedCommClient, g *game.Game, loc coords.Coord, p *g
 	}
 	target := coords.Configuration{loc, r.Configuration.Heading}
 	if !g.Board.IsInbounds(loc) {
-		c.Broadcast(g, executeRobotFall(p, target, reason))
+		executeRobotFall(c, g, p, target, reason)
 		return true
 	}
 	// FIXME ignored error
@@ -114,7 +114,7 @@ func attemptMove(c comm.ExtendedCommClient, g *game.Game, loc coords.Coord, p *g
 
 	tile, _ := g.Board.GetTile(loc)
 	if tile.Type == game.Pit {
-		c.Broadcast(g, executeRobotFall(p, target, reason))
+		executeRobotFall(c, g, p, target, reason)
 		return true
 	}
 	collidePlayer := g.CheckForRobot(loc)
@@ -252,11 +252,11 @@ func cleanup(c comm.ExtendedCommClient, g *game.Game) {
 	}
 }
 
-// TODO need to also message loss of a life
-func executeRobotFall(p *game.Player, target coords.Configuration, reason MoveReason) NotifyRobotFell {
+func executeRobotFall(c comm.ExtendedCommClient, g *game.Game, p *game.Player, target coords.Configuration, reason MoveReason) {
 	r := &p.Robot
-	r.Lives--
-	e := NotifyRobotFell{p.Name, reason, *r.Configuration, target}
+	old := *r.Configuration
 	r.Configuration = nil
-	return e
+	r.Lives--
+	c.Broadcast(g, NotifyRobotFell{p.Name, reason, old, target})
+	c.Broadcast(g, NotifyLifeLoss{p.Name, r.Lives})
 }

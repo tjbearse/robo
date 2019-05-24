@@ -23,6 +23,9 @@ func StartSpawnPhase(cc comm.CommClient) {
 	for p := range(g.GetPlayers()) {
 		// who is not on the board?
 		if p.Robot.Configuration == nil {
+			if p.Robot.Lives == 0 {
+				continue
+			}
 			// FIXME don't spawn if dead
 			switch p.Spawn.State {
 			case game.Unset:
