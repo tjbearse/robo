@@ -10,10 +10,6 @@ function init() {
 		protocol = "wss://"
 	}
 	conn = new WebSocket(protocol + document.location.host + document.location.pathname + "ws")
-	console.log(conn)
-	conn.onclose = function (evt) {
-		window.alert("Connection closed")
-	};
 }
 
 export { conn, init }

@@ -68,13 +68,13 @@ func (e *ExtendedCommClient) unpack() (*game.Game, *game.Player, error) {
 	gI := e.CommClient.GetContext(gameKey)
 	g, ok := gI.(*game.Game)
 	if !ok {
-		return nil, nil, errors.New("non game ptr set as game")
+		return nil, nil, noGameError
 	}
 
 	pI := e.CommClient.GetContext(playerKey)
 	p, ok := pI.(*game.Player)
 	if !ok {
-		return nil, nil, errors.New("non player ptr set as player")
+		return nil, nil, noPlayerError
 	}
 
 	return g, p, nil

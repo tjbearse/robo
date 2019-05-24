@@ -20,6 +20,7 @@ Object.assign(window, {
 function windowOnLoad() {
 	init()
 	conn.onmessage = handleMessage
+	conn.onclose = handleClose
 
 	drawCrappyVersion(store.getState())
 	const unsubscribeDraw = store.subscribe(() => drawCrappyVersion(store.getState()))
@@ -35,6 +36,10 @@ function handleMessage(evt) {
 		let payload = json.Msg
 		store.dispatch({type, payload})
 	}
+}
+
+function handleClose() {
+	store.dispatch({type: 'error', payload: 'connection closed'})
 }
 
 function submitForm() {
