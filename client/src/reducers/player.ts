@@ -54,11 +54,13 @@ const playersReducer = createReducer(
 					}
 				})
 			},
+			[notify.Damage]: (player, { NewTotal }) => { player.robot.damage = NewTotal },
+			[notify.Heal]: (player, { NewTotal }) => { player.robot.damage = NewTotal },
+			[notify.LifeLoss]: (player, { NewTotal }) => { player.robot.lives = NewTotal },
 			/*
 			  TODO
 			  FlagTouched = 'NotifyFlagTouched',
 			  PlayerFinished
-
 
 			  PlayerReady = 'NotifyPlayerReady',
 			  //not me

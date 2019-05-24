@@ -1,5 +1,10 @@
 import {Walls, TileType} from "./types/board"
 import {ClearError} from './actions/playerActions'
+import {Player} from "./types/player"
+
+interface PlayerMap {
+	[name: string]: Player
+}
 
 export default function drawCrappyVersion(state) {
 	const {
@@ -27,6 +32,7 @@ export default function drawCrappyVersion(state) {
 	if (uiInfo.winner) {
 		e.appendChild(drawGameOver(uiInfo.winner))
 	}
+	e.appendChild(drawHealthOverview(players))
 
 
 	let old = document.getElementById('gameArea')
@@ -34,6 +40,19 @@ export default function drawCrappyVersion(state) {
 	return
 
 	// --
+
+	function drawHealthOverview(players : PlayerMap) {
+		let eOverview = document.createElement('ol')
+		eOverview.id = 'overview'
+		let coords = Object.values(players).reduce(( e, player ) => {
+			let { name, hand, board, robot: { lives, damage } } = player
+			let elm = document.createElement('li')
+			elm.innerText = `${name}: lives: ${lives} damage: ${damage}`
+			e.appendChild(elm)
+			return e
+		}, eOverview)
+		return eOverview
+	}
 
 	function drawGameOver(winner) {
 		let span = document.createElement('span')
@@ -52,7 +71,7 @@ export default function drawCrappyVersion(state) {
 		return eError
 	}
 
-	function drawCrappyBoard(board, players, { colors }){
+	function drawCrappyBoard(board, players : PlayerMap, { colors }){
 		let eBoard = document.createElement('table')
 		eBoard.id = 'board'
 		if (board.length == 0) {
@@ -125,7 +144,7 @@ export default function drawCrappyVersion(state) {
 		// hand
 		let eHand = document.createElement('ol')
 		eHand.id = 'hand'
-		eHand.start = '0'
+		eHand.start = 0
 		myPlayer.hand.forEach((card) => {
 			let eCard = getCard(card)
 			eHand.appendChild(eCard)
@@ -138,7 +157,7 @@ export default function drawCrappyVersion(state) {
 		// robot board
 		let eBoard = document.createElement('ol')
 		eBoard.id = 'robot-board'
-		eBoard.start = '0'
+		eBoard.start = 0
 		for (let i=0; i < 5; i++) {
 			let eSlot;
 			if (myPlayer.board[i]) {

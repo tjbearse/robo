@@ -28,8 +28,11 @@ enum Notifications {
 	// uncat
 	Board = 'NotifyBoard',
 	NewGame = 'NotifyNewGame',
-	Error = "error",
-	ErrorReport = "ErrorReport",
+	Error = 'error',
+	ErrorReport = 'ErrorReport',
+	Heal = 'NotifyHeal',
+	Damage = 'NotifyDamage',
+	LifeLoss = 'NotifyLifeLoss',
 }
 
 export default Notifications
