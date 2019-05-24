@@ -118,6 +118,9 @@ body {
 #board td.tile-Gear::before {
 	background: url(./sprites.svg) -50px -100px;
 }
+#board td.tile-Spawn::before {
+	background: url(./sprites.svg) -100px -100px;
+}
 #board td.tile-OffMap::before {
 	background: #222;
 }
