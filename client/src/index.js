@@ -3,6 +3,7 @@ import './game.css'
 import {conn, init} from './websocket'
 import * as uiActions from './uiActions'
 import drawCrappyVersion from './ui'
+import queue from './queue'
 
 // This file is mostly temporary stuff while I work on data store
 
@@ -34,7 +35,7 @@ function handleMessage(evt) {
 		let json = JSON.parse(messages[i])
 		let type = json.Type
 		let payload = json.Msg
-		store.dispatch({type, payload})
+		queue.push({type, payload})
 	}
 }
 
