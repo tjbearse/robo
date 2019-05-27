@@ -49,7 +49,7 @@ func fireLasers(c comm.ExtendedCommClient, g *game.Game, reg int) {
 			r := ray.EndPlayer.Robot
 			r.Damage++
 			c.Broadcast(g, NotifyDamage{ray.EndPlayer.Name, r.Damage})
-			if r.Damage == MaxDamage {
+			if r.Damage >= MaxDamage {
 				r.Lives--
 				r.Configuration = nil
 				c.Broadcast(g, NotifyLifeLoss{ray.EndPlayer.Name, r.Lives})

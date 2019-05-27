@@ -38,9 +38,11 @@ func StartSpawnPhase(cc comm.CommClient) {
 				c.Broadcast(g, NotifySpawnUpdate{p.Name, config.Location})
 				c.Broadcast(g, executeSpawn(p, config))
 			case game.Rotatable:
-				// FIXME all spawns after the first get 2 damage
 				loc := p.Spawn.Coord
 				prompt := PromptForSpawn{p.Name, loc}
+				// All spawns after the first get 2 damage
+				p.Robot.Damage = 2
+				c.Broadcast(g, NotifyDamage{p.Name, p.Robot.Damage})
 				c.MessagePlayer(p, prompt)
 				selecting[p] = false
 			}
