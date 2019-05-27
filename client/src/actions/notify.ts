@@ -1,6 +1,7 @@
 enum Notifications {
 	AddPlayer = 'NotifyAddPlayer',
 	Welcome = 'NotifyWelcome',
+	Goodbye = 'NotifyGoodbye',
 	RemovePlayer = 'NotifyRemovePlayer',
 
 	FlagTouched = 'NotifyFlagTouched',

@@ -20,6 +20,7 @@ const uiInfoReducer = createReducer(initialState, {
 		state.winner = Player
 	},
 	[notify.Welcome]: (state, action) => initialState,
+	[notify.Goodbye]: (state, action) => initialState,
 	[notify.ErrorReport]: (state, {payload: {Error}})=> { state.error = Error },
 	[notify.Error]: (state, {payload}) => { state.error = payload },
 	[ClearError.type]: (state, action) => { state.error = '' },

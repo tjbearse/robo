@@ -20,10 +20,12 @@ func StartCardsPhase (cc comm.CommClient) {
 	}
 	hands := map[*game.Player][]cards.Card{}
 	players := g.GetPlayers()
+	ready := map[*game.Player]bool{}
 	for p := range(players) {
 		if p.Robot.Lives == 0 {
 			continue
 		}
+		ready[p] = false
 		cards, err := g.Deck.Deal(HandSize - p.Robot.Damage)
 		if err != nil {
 			c.Broadcast(g, ErrorReport{err.Error()})
@@ -34,7 +36,7 @@ func StartCardsPhase (cc comm.CommClient) {
 		prompt := PromptWithHand{hands[p]}
 		c.MessagePlayer(p, prompt)
 	}
-	newPh := PlayCardsPhase{hands, map[*game.Player]bool{}}
+	newPh := PlayCardsPhase{hands, ready}
 	g.ChangePhase(&newPh)
 }
 

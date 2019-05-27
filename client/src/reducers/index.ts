@@ -1,24 +1,24 @@
 import { createReducer } from 'redux-starter-kit'
 import notify from '../actions/notify'
+import * as outgoing from '../actions/playerTriggered'
 import playersReducer from './player'
 import boardReducer from './board'
 import uiInfoReducer from './uiInfo'
+import Phases from '../types/phases'
 
-enum Phases {
-	Join,
-	Spawn,
-	PlayCards,
-	Simulate,
-	GameOver,
-}
-
-const gameInfoReducer = createReducer({
+const initialState = {
 	id: '',
-	phase: Phases.Join
-}, {
-    [notify.StartSpawn]: (state, action) => { state.phase = Phases.Spawn },
-	[notify.Welcome]: (state, { payload: { GameId }}) => ({ id: GameId, phase: Phases.Join })
-	// PlayerFinished = 'NotifyPlayerFinished',
+	phase: Phases.NoGame
+}
+const gameInfoReducer = createReducer(initialState, {
+	[notify.Welcome]: (state, { payload: { GameId }}) => ({ id: GameId, phase: Phases.Join }),
+	[notify.Goodbye]: (state, action) => initialState,
+    [notify.StartSpawn]: (state, action) => { state.phase = Phases.SpawnWait },
+    [notify.PromptForSpawn]: (state, action) => { state.phase = Phases.Spawn },
+    [notify.PromptWithHand]: (state, action) => { state.phase = Phases.PlayCards },
+	[outgoing.CommitCards.type]: (state, action) => { state.phase = Phases.PlayCardsWait },
+	[notify.RevealCard]: (state, action) => { state.phase = Phases.Simulate },
+	[notify.PlayerFinished]: (state, action) => { state.phase = Phases.GameOver },
 })
 
 // root

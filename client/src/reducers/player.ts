@@ -2,7 +2,7 @@ import { createReducer } from 'redux-starter-kit'
 
 import notify from '../actions/notify'
 import {Player, newPlayer} from '../types/player'
-import {newCardBack} from '../types/card'
+import {fromObject, newCardBack} from '../types/card'
 import {Dir} from '../types/coord'
 
 /*
@@ -10,19 +10,19 @@ import {Dir} from '../types/coord'
   players
 */
 const initialState = { me: null, players: {} }
-// TODO add welcome message to golang so we know who "me" is
 const playersReducer = createReducer(
 	initialState,
 	stripActionFluff({
 		[notify.AddPlayer]: ({players}, {Name}) => { players[Name] = newPlayer(Name) },
 		[notify.RemovePlayer]: ({players}, {Name}) => { delete players[Name] },
+		[notify.Goodbye]: (state, action) => initialState,
 		[notify.Welcome]: (state, {Name}) => ({
 			me: Name,
 			players: {},
 		}),
 
 		...onMe({
-			[notify.PromptWithHand]: (me, {Cards}) => { me.hand = Cards },
+			[notify.PromptWithHand]: (me, {Cards}) => { me.hand = Cards.map(fromObject) },
 			[notify.CardToBoard]: (me, payload) => {
 				const {BoardSlot, HandOffset} = payload
 				me.board[BoardSlot] = me.hand.splice(HandOffset, 1)[0]
