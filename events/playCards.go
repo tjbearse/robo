@@ -66,7 +66,7 @@ func (e CardToBoard) Exec(cc comm.CommClient) error {
 
 	hand := ph.Hands[p]
 	co := e.HandOffset
-	if int(co) > len(hand) {
+	if int(co) >= len(hand) {
 		return fmt.Errorf("card out of range: %d", co)
 	}
 	card := hand[co]
