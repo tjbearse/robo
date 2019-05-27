@@ -1,0 +1,254 @@
+@wide-screen-down: ~'(max-width: 1199px)';
+@desktop-down: ~'(max-width: 991px)';
+@tablet-down: ~'(max-width: 767px)';
+@phone-down: ~'(max-width: 480px)';
+@small-phone-down: ~'(max-width: 320px)';
+
+body {
+    padding: 0;
+    margin: 0;
+    background: lightgrey;
+}
+
+#gameArea {
+	width: 100%;
+
+	#gameOver {
+		position: absolute;
+		top: 40%;
+		bottom: 40%;
+		left: -10px;
+		right: -10px;
+		background: white;
+		text-align: center;
+		font-size: 72px;
+		animation-name: wobble;
+		animation-duration: 2s;
+		animation-iteration-count: infinite;
+		span {
+			vertical-align: middle;
+		}
+	}
+
+	#playArea {
+		margin: 8px;
+
+		.card .priority {
+			color: grey;
+		}
+		#robot-board .selected, .card.selected {
+			font-weight: bold;
+		}
+		#robot-board li, #hand li {
+			line-height: 1.5;
+		}
+	}
+
+	#board {
+		border-collapse: collapse;
+
+		td.tile {
+			padding: 0;
+			border: 1px solid grey;
+			position: relative;
+
+			.box(@p) {
+				width: @p;
+				height: @p;
+			}
+
+			.box(40px);
+			@media @desktop-down{ .box(30px); }
+			@media @tablet-down { .box(30px); } /* double col */
+			@media @phone-down  { .box(30px); } /* single col */
+
+
+
+			.wall {
+				height: 100%;
+				width: 100%;
+				position: absolute;
+				top: 0;
+				left: 0;
+				border-width: 4px;
+				border-color: #d4aa00;
+				box-sizing: border-box;
+				&.wall-North {
+					border-top-style: solid
+				}
+				&.wall-East {
+					border-right-style: solid
+				}
+				&.wall-South {
+					border-bottom-style: solid
+				}
+				&.wall-West {
+					border-left-style: solid;
+				}
+			}
+
+			&::before {
+				content: "";
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				top: 0;
+				left: 0;
+				z-index: -1;
+				background-repeat: no-repeat;
+				background-size: contain;
+			}
+			&.tile-Floor::before {
+				background-image: url(./img/intermediates/floor.png)
+			}
+			&.tile-Pit::before {
+				background-image: url(./img/intermediates/pit.png)
+			}
+			&.tile-Repair::before {
+				background-image: url(./img/intermediates/repair.png)
+			}
+			&.tile-Upgrade::before {
+				background-image: url(./img/intermediates/upgrade.png)
+			}
+			&.tile-Flag::before {
+				background-image: url(./img/intermediates/flag.png)
+			}
+			/* curved belts? */
+			&.tile-Conveyor::before {
+				background-image: url(./img/intermediates/conveyor.png)
+			}
+			&.tile-ExpressConveyor::before {
+				background-image: url(./img/intermediates/express.png)
+			}
+			&.tile-Pusher::before {
+				background-image: url(./img/intermediates/pusher.png)
+			}
+			&.tile-Laser::before {
+				background-image: url(./img/intermediates/laser.png)
+			}
+			&.tile-Spawn::before {
+				background-image: url(./img/intermediates/spawn.png)
+			}
+			&.tile-OffMap::before {
+				background: #222;
+			}
+			&.tile-Gear {
+				&::before {
+					background-image: url(./img/intermediates/gear.png)
+				}
+				&.dir-South::before, &.dir-East::before, &.dir-West::before {
+					transform: scaleX(-1)
+				}
+			}
+
+			&.dir-East::before {
+				.East()
+			}
+			&.dir-West::before {
+				.West()
+			}
+
+			&.dir-South::before {
+				.South()
+			}
+
+			.robot {
+				width: 100%;
+				height: 100%;
+				z-index: 10;
+				position: absolute;
+				top: 0;
+				left: 0;
+				background-repeat: no-repeat;
+				background-size: contain;
+				background-image: url(./img/intermediates/robot0.png);
+
+				// directions
+				&.dir-East {
+					.East()
+				}
+				&.dir-South {
+					.South()
+				}
+				&.dir-West {
+					.West()
+				}
+
+				// sprites
+				&.robot-0 {
+					background-image: url(./img/intermediates/robot0.png)
+				}
+				&.robot-1 {
+					background-image: url(./img/intermediates/robot1.png)
+				}
+				&.robot-2 {
+					background-image: url(./img/intermediates/robot2.png)
+				}
+				&.robot-3 {
+					background-image: url(./img/intermediates/robot3.png)
+				}
+				&.robot-4 {
+					background-image: url(./img/intermediates/robot4.png)
+				}
+				&.robot-5 {
+					background-image: url(./img/intermediates/robot5.png)
+				}
+				&.robot-6 {
+					background-image: url(./img/intermediates/robot6.png)
+				}
+				&.robot-7 {
+					background-image: url(./img/intermediates/robot7.png)
+				}
+
+				&.dir-indeterminent {
+					transform: rotate(180deg);
+					animation-name: spin;
+					animation-duration: 4s;
+					animation-iteration-count: infinite;
+				}
+			}
+		} // End td.Tile
+
+
+	} // End #board
+
+
+	#ControlForm, #ControlForm * {
+		margin: 4px;
+	}
+
+	#error {
+		background: yellow;
+		color: black;
+		position: fixed;
+		top: 8px;
+		left: 8px;
+		padding: 4px;
+		border-radius: 8px;
+		z-index: 30;
+	}
+}
+
+@keyframes wobble {
+	0% { transform: rotate(-4deg); }
+	50% { transform: rotate(4deg); }
+	100% { transform: rotate(-4deg); }
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	25% { transform: rotate(90deg); }
+	50% { transform: rotate(180deg); }
+	75% { transform: rotate(270deg); }
+	100% { transform: rotate(360deg); }
+}
+
+.East() {
+	transform: rotate(90deg);
+}
+.West() {
+	transform: rotate(270deg);
+}
+.South() {
+	transform: rotate(180deg);
+}

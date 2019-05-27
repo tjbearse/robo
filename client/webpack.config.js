@@ -17,6 +17,11 @@ module.exports = {
 				exclude: /node_modules/
 			},
 			{
+				test: /\.less$/,
+				use: ['style-loader', 'css-loader', 'less-loader'],
+				exclude: /node_modules/
+			},
+			{
 				test: /\.(png|svg|jpg|gif)$/,
 				use: 'file-loader',
 				exclude: /node_modules/

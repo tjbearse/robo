@@ -1,5 +1,5 @@
 import store from "./store"
-import './game.css'
+import './game.less'
 import {conn, init} from './websocket'
 import drawCrappyVersion from './ui'
 import queue from './queue'
