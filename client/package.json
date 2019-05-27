@@ -16,8 +16,8 @@
 		"webpack-cli": "^3.3.2"
 	},
 	"scripts": {
-		"build": "webpack --mode development && cp src/index.html dist/",
+		"build": "webpack --mode development",
 		"build-watch": "webpack --watch --mode development",
-		"build-prod": "webpack --mode production && cp src/index.html dist/"
+		"build-prod": "webpack --mode production"
 	}
 }

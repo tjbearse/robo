@@ -3,7 +3,7 @@ FROM node as node-builder
 RUN mkdir /home/node/robo
 WORKDIR /home/node/robo
 COPY client/package.json .
-RUN npm install
+RUN make
 COPY client ./
 RUN npm run build-prod
 
