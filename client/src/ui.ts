@@ -1,6 +1,9 @@
-import {Walls, TileType} from "./types/board"
+import {Walls, TileType, Tile} from "./types/board"
 import {ClearError} from './actions/playerActions'
 import {Player} from "./types/player"
+import * as uiActions from './uiActions'
+import Phases from './types/phases'
+import { Card, Command, commandToText } from './types/card'
 
 interface PlayerMap {
 	[name: string]: Player
@@ -16,23 +19,25 @@ export default function drawCrappyVersion(state) {
 	} = state
 	const myPlayer = players[me]
 
-	let e = document.createElement('div')
+	let e = tag('div')
 	e.id = 'gameArea'
-	let eGameId = document.createElement('div')
+	let eGameId = tag('div')
 	eGameId.innerText = 'GameId: ' + gameInfo.id
 	e.appendChild(eGameId)
 	if (uiInfo.error) {
 		e.appendChild(drawError(uiInfo.error))
 	}
+	e.appendChild(drawHealthOverview(players))
 	
 	e.appendChild(drawCrappyBoard(board, players, uiInfo))
+	e.appendChild(drawCrappyForm(gameInfo))
+
 	if (myPlayer) {
 		e.appendChild(drawMyHandAndBoard(myPlayer))
 	}
 	if (uiInfo.winner) {
 		e.appendChild(drawGameOver(uiInfo.winner))
 	}
-	e.appendChild(drawHealthOverview(players))
 
 
 	let old = document.getElementById('gameArea')
@@ -42,29 +47,32 @@ export default function drawCrappyVersion(state) {
 	// --
 
 	function drawHealthOverview(players : PlayerMap) {
-		let eOverview = document.createElement('ol')
+		let eOverview = tag('div')
 		eOverview.id = 'overview'
+		eOverview.innerText = 'Players:'
+		let list = tag('ol')
 		let coords = Object.values(players).reduce(( e, player ) => {
 			let { name, hand, board, robot: { lives, damage } } = player
-			let elm = document.createElement('li')
+			let elm = tag('li')
 			elm.innerText = `${name}: lives: ${lives} damage: ${damage}`
 			e.appendChild(elm)
 			return e
-		}, eOverview)
+		}, list)
+		eOverview.appendChild(list)
 		return eOverview
 	}
 
 	function drawGameOver(winner) {
-		let span = document.createElement('span')
+		let span = tag('span')
 		span.innerText = winner + ' won!'
-		let e = document.createElement('div')
+		let e = tag('div')
 		e.appendChild(span)
 		e.id = 'gameOver'
 		return e
 	}
 
 	function drawError(e) {
-		let eError = document.createElement('div')
+		let eError = tag('div')
 		eError.id='error'
 		eError.innerText = uiInfo.error
 		eError.onclick = function() { ClearError() }
@@ -72,7 +80,7 @@ export default function drawCrappyVersion(state) {
 	}
 
 	function drawCrappyBoard(board, players : PlayerMap, { colors }){
-		let eBoard = document.createElement('table')
+		let eBoard = tag('table')
 		eBoard.id = 'board'
 		if (board.length == 0) {
 			return eBoard
@@ -98,15 +106,15 @@ export default function drawCrappyVersion(state) {
 		  v
 		*/
 		for (let y=-1; y<board[0].length+1; y++) {
-			let row = document.createElement('tr')
+			let row = tag('tr')
 			for (let x=-1; x<board.length+1; x++) {
-				let cell = document.createElement('td')
+				let cell = tag('td')
 				if (x < 0 || x >= board.length || y < 0 || y >= board[0].length) {
 					// Off map
 					cell.className = 'tile tile-OffMap'
 				} else {
 					// Real map
-					let tile = board[x][y]
+					let tile : Tile = board[x][y]
 					let wallClass = [Walls.North, Walls.East, Walls.South, Walls.West]
 						.reduce((acc, w) => {
 							if (tile.walls & w) {
@@ -116,15 +124,18 @@ export default function drawCrappyVersion(state) {
 						}, '')
 					cell.className = 'tile tile-' + TileType[tile.type] +
 						' dir-' + tile.dir
+					if (tile.type == TileType.Flag) {
+						cell.innerText += tile.num + 1
+					}
 					if (wallClass) {
-						let wall = document.createElement('div')
+						let wall = tag('div')
 						wall.className = 'wall ' + wallClass
 						cell.appendChild(wall)
 					}
 				}
 				if (coords[x] && coords[x][y]) {
 					let player = coords[x][y]
-					let eRobot = document.createElement('div')
+					let eRobot = tag('div')
 					eRobot.className = 'robot dir-'+(player.robot.config.Heading || 'indeterminent') +
 						' robot-' + colors.map[player.name]
 					cell.appendChild(eRobot)
@@ -138,24 +149,24 @@ export default function drawCrappyVersion(state) {
 	}
 
 	function drawMyHandAndBoard(myPlayer){
-		let ePlayArea = document.createElement('div')
+		let ePlayArea = tag('div')
 		ePlayArea.id = 'playArea'
 
 		// hand
-		let eHand = document.createElement('ol')
+		let eHand = tag('ol')
 		eHand.id = 'hand'
 		eHand.start = 0
 		myPlayer.hand.forEach((card) => {
 			let eCard = getCard(card)
 			eHand.appendChild(eCard)
 		})
-		let heading = document.createElement('div')
+		let heading = tag('div')
 		heading.innerText = 'Hand'
 		heading.appendChild(eHand)
 		ePlayArea.appendChild(heading)
 
 		// robot board
-		let eBoard = document.createElement('ol')
+		let eBoard = tag('ol')
 		eBoard.id = 'robot-board'
 		eBoard.start = 0
 		for (let i=0; i < 5; i++) {
@@ -163,23 +174,124 @@ export default function drawCrappyVersion(state) {
 			if (myPlayer.board[i]) {
 				eSlot = getCard(myPlayer.board[i])
 			} else {
-				eSlot = document.createElement('li')
+				eSlot = tag('li')
 			}
 			eBoard.appendChild(eSlot)
 		}
-		heading = document.createElement('div')
+		heading = tag('div')
 		heading.innerText = 'Board'
 		heading.appendChild(eBoard)
 		ePlayArea.appendChild(heading)
 
 		return ePlayArea
 
-		function getCard(c) {
-			let eCard = document.createElement('li')
+		function getCard(c : Card) {
+			let eCard = tag('li')
 			eCard.className = 'card'
-			eCard.innerText = JSON.stringify(Object.values(c))
+			let text = commandToText(c.Command) + ' '
+			if (c.Command = Command.Move) {
+				text += `${c.Reps} `
+			}
+			eCard.innerText = text
+			let ePrior = tag('span')
+			ePrior.className = 'priority'
+			ePrior.innerText = `(${c.Priority})`
+			eCard.appendChild(ePrior)
 			return eCard
 		}
 	}
 
+}
+
+function tag(s) {
+	return document.createElement(s)
+}
+function button(str, onclickfn) {
+	let btn = tag('button')
+	btn.innerText = str
+	btn.onclick = ()=> { onclickfn() }
+	return btn
+}
+
+function drawCrappyForm(gameInfo) {
+	let e = tag('div')
+	e.id = 'ControlForm'
+	if (gameInfo.phase != Phases.NoGame) {
+		e.appendChild(button('Leave Game', uiActions.leaveGame))
+	}
+	switch(gameInfo.phase) {
+		case Phases.NoGame:
+			addJoinGame(e)
+			break;
+		case Phases.Join:
+			let btn = button('Ready To Spawn', uiActions.readyToSpawn)
+			e.appendChild(btn)
+			break;
+		case Phases.SpawnWait:
+			addText(e, 'Waiting for others to spawn')
+			break;
+		case Phases.Spawn:
+			addSetSpawnHeading(e)
+			break;
+		case Phases.PlayCards:
+			addPlayCards(e)
+			break;
+		case Phases.PlayCardsWait:
+			addText(e, 'Waiting for others to finish')
+			break;
+		case Phases.Simulate:
+			addText(e, 'Running turns')
+			break;
+		case Phases.GameOver:
+			addText(e, 'Game Over')
+			break;
+	}
+	return e
+
+	// --
+
+	function addText(e, str) {
+		let s = tag('span')
+		s.innerText = str
+		e.appendChild(s)
+	}
+
+	function addJoinGame(e) {
+		let div = tag('div')
+		div.innerHTML += `<label>name</label> <input value="TJ" id="name"/>
+				<label>gameid</label> <input id="gameId"/>
+				<br/>`
+		let btn = tag('button')
+		btn.innerText = 'New Game'
+		btn.onclick= ()=> { uiActions.newGame() }
+		div.appendChild(btn)
+		btn = tag('button')
+		btn.innerText = 'Join Game'
+		btn.onclick= ()=> { uiActions.joinGame() }
+		div.appendChild(btn)
+		e.appendChild(div)
+	}
+
+	function addPlayCards(e) {
+		let div = tag('div')
+		div.innerHTML = `<label>Hand Slot</label><input id="cardslot" value="0" label="hand slot" type="number" />
+		<label>Board Slot</label><input id="boardslot" value="0" label="board slot" type="number" />
+		<br/>`
+		div.appendChild(button('Card To Board', uiActions.cardToBoard))
+		div.appendChild(button('Card To Hand', uiActions.cardToHand))
+		div.appendChild(button('Commit Cards', uiActions.commitCards))
+		e.appendChild(div)
+	}
+
+	function addSetSpawnHeading(e) {
+		let div = tag('div')
+		div.innerHTML = `<select id="spawnHeading">
+		  <option>North</option>
+		  <option>East</option>
+		  <option>South</option>
+		  <option>West</option>
+		</select>`
+		div.appendChild(button('Set Spawn Heading', uiActions.setSpawnHeading))
+		e.appendChild(div)
+	}
 }

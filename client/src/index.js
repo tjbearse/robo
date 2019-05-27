@@ -1,7 +1,6 @@
 import store from "./store"
 import './game.css'
 import {conn, init} from './websocket'
-import * as uiActions from './uiActions'
 import drawCrappyVersion from './ui'
 import queue from './queue'
 
@@ -11,10 +10,6 @@ console.log(store.getState())
 const unsubscribe = store.subscribe(() => console.log(store.getState()))
 
 window.onload = windowOnLoad
-// crappy player api :)
-Object.assign(window, {
-	...uiActions
-})
 
 // --
 
@@ -25,8 +20,6 @@ function windowOnLoad() {
 
 	drawCrappyVersion(store.getState())
 	const unsubscribeDraw = store.subscribe(() => drawCrappyVersion(store.getState()))
-
-	document.getElementById("form").onsubmit = submitForm
 };
 
 function handleMessage(evt) {

@@ -8,46 +8,5 @@
 <body>
 	<div id="gameArea">
 	</div>
-	<div id="helperBtns">
-	  <div>
-		<label>name</label> <input value="TJ" id="name"/>
-		<label>gameid</label> <input id="gameId"/>
-		<br/>
-		<button onclick="newGame()">NewGame</button>
-		<button onclick="joinGame()">JoinGame</button>
-	  </div>
-	  <br/>
-	  <button onclick="readyToSpawn()">ReadyToSpawn</button>
-	  <br/>
-	  <div>
-		<label>Hand Slot</label><input id="cardslot" value="0" label="hand slot" type="number" />
-		<label>Board Slot</label><input id="boardslot" value="0" label="board slot" type="number" />
-		<br/>
-		<button onclick="cardToBoard()">CardToBoard</button>
-		<button onclick="cardToHand()">CardToHand</button>
-		<button onclick="commitCards()">CommitCards</button>
-	  </div>
-	  <br/>
-	  <div>
-		<select id="spawnHeading">
-		  <option>North</option>
-		  <option>East</option>
-		  <option>South</option>
-		  <option>West</option>
-		</select>
-		<button onclick="setSpawnHeading()">SetSpawnHeading</button>
-	  </div>
-	  <br/>
-	  <div id="messages">
-		Manual Messages
-		<form id="form">
-		  <input type="text" id="Type" size="64"/>
-			<br/>
-			<input type="text" id="Msg" size="64"/>
-			<br/>
-			<input type="submit" value="Send" />
-		</form>
-	  </div>
-	</div>
 </body>
 </html>

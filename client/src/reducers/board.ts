@@ -28,6 +28,7 @@ const boardReducer = createReducer([], {
 		return board
 	},
 	[notify.Welcome]: (state, action) => [],
+	[notify.Goodbye]: (state, action) => [],
 })
 
 export default boardReducer

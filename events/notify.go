@@ -26,6 +26,7 @@ type NotifyWelcome struct {
 	GameId GameId
 	Name string
 }
+type NotifyGoodbye struct {}
 
 
 // Reasons for movement

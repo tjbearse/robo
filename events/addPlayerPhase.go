@@ -69,6 +69,7 @@ func (e LeaveGame) Exec(cc comm.CommClient) error {
 	players := g.GetPlayers()
 	delete(players, p)
 	g.UpdatePlayers(players)
+	c.Reply(NotifyGoodbye{})
 	c.Clear()
 	c.Broadcast(g, NotifyRemovePlayer{p.Name})
 	return nil

@@ -7,13 +7,11 @@ body {
     margin: 0;
     width: 100%;
     height: 100%;
-    background: gray;
+    background: lightgrey;
 }
 
 #gameArea {
-	width: 50%;
-	height: 100%;
-	float: left;
+	width: 100%;
 }
 
 #gameOver {
@@ -40,12 +38,10 @@ body {
 
 #playArea {
 	margin: 8px;
-	float: left;
 }
 
 #board {
 	border-collapse: collapse;
-	float:left;
 }
 #board td {
 	width: 50px;
@@ -182,18 +178,23 @@ td.tile-Gear.dir-South::before, td.tile-Gear.dir-East::before, td.tile-Gear.dir-
 	background: url(./sprites.svg) -150px -200px;
 }
 
-#helperBtns, #helperBtns * {
+#ControlForm, #ControlForm * {
 	margin: 4px;
 }
 #cardslot, #boardslot {
 	width: 45px;
 }
+.card .priority {
+	color: grey;
+}
 
 #error {
-	background: red;
+	background: yellow;
+	color: black;
 	position: fixed;
 	top: 8px;
 	left: 8px;
 	padding: 4px;
 	border-radius: 8px;
+	z-index: 30;
 }
