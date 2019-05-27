@@ -4,6 +4,7 @@ import {Player} from "./types/player"
 import * as uiActions from './uiActions'
 import Phases from './types/phases'
 import { Card, Command, commandToText } from './types/card'
+import { SelectCard, SelectSlot } from './actions/playerActions'
 
 interface PlayerMap {
 	[name: string]: Player
@@ -30,10 +31,10 @@ export default function drawCrappyVersion(state) {
 	e.appendChild(drawHealthOverview(players))
 	
 	e.appendChild(drawCrappyBoard(board, players, uiInfo))
-	e.appendChild(drawCrappyForm(gameInfo))
+	e.appendChild(drawCrappyForm(gameInfo, uiInfo))
 
 	if (myPlayer) {
-		e.appendChild(drawMyHandAndBoard(myPlayer))
+		e.appendChild(drawMyHandAndBoard(myPlayer, uiInfo.selected.card, uiInfo.selected.board))
 	}
 	if (uiInfo.winner) {
 		e.appendChild(drawGameOver(uiInfo.winner))
@@ -148,7 +149,7 @@ export default function drawCrappyVersion(state) {
 		return eBoard
 	}
 
-	function drawMyHandAndBoard(myPlayer){
+	function drawMyHandAndBoard(myPlayer, cardSel, boardSel){
 		let ePlayArea = tag('div')
 		ePlayArea.id = 'playArea'
 
@@ -156,8 +157,13 @@ export default function drawCrappyVersion(state) {
 		let eHand = tag('ol')
 		eHand.id = 'hand'
 		eHand.start = 0
-		myPlayer.hand.forEach((card) => {
+		myPlayer.hand.forEach((card, i) => {
 			let eCard = getCard(card)
+			if (cardSel == i) {
+				eCard.className += ' selected'
+			} else {
+				eCard.onclick = ()=> { SelectCard(i) }
+			}
 			eHand.appendChild(eCard)
 		})
 		let heading = tag('div')
@@ -175,6 +181,12 @@ export default function drawCrappyVersion(state) {
 				eSlot = getCard(myPlayer.board[i])
 			} else {
 				eSlot = tag('li')
+				eSlot.innerText = '____'
+			}
+			if (boardSel == i) {
+				eSlot.className += ' selected'
+			} else {
+				eSlot.onclick = ()=> { SelectSlot(i) }
 			}
 			eBoard.appendChild(eSlot)
 		}
@@ -189,7 +201,7 @@ export default function drawCrappyVersion(state) {
 			let eCard = tag('li')
 			eCard.className = 'card'
 			let text = commandToText(c.Command) + ' '
-			if (c.Command = Command.Move) {
+			if (c.Command === Command.Move) {
 				text += `${c.Reps} `
 			}
 			eCard.innerText = text
@@ -213,7 +225,7 @@ function button(str, onclickfn) {
 	return btn
 }
 
-function drawCrappyForm(gameInfo) {
+function drawCrappyForm(gameInfo, uiInfo) {
 	let e = tag('div')
 	e.id = 'ControlForm'
 	if (gameInfo.phase != Phases.NoGame) {
@@ -234,7 +246,7 @@ function drawCrappyForm(gameInfo) {
 			addSetSpawnHeading(e)
 			break;
 		case Phases.PlayCards:
-			addPlayCards(e)
+			addPlayCards(e, uiInfo.selected.card, uiInfo.selected.board)
 			break;
 		case Phases.PlayCardsWait:
 			addText(e, 'Waiting for others to finish')
@@ -272,10 +284,11 @@ function drawCrappyForm(gameInfo) {
 		e.appendChild(div)
 	}
 
-	function addPlayCards(e) {
+	function addPlayCards(e, card, board) {
 		let div = tag('div')
-		div.innerHTML = `<label>Hand Slot</label><input id="cardslot" value="0" label="hand slot" type="number" />
-		<label>Board Slot</label><input id="boardslot" value="0" label="board slot" type="number" />
+		// TODO remove this and rewire values into buttons below directly
+		div.innerHTML = `<label>Hand Slot</label><input disabled id="cardslot" value="${card}" label="hand slot" type="number" />
+		<label>Board Slot</label><input disabled id="boardslot" value="${board}" label="board slot" type="number" />
 		<br/>`
 		div.appendChild(button('Card To Board', uiActions.cardToBoard))
 		div.appendChild(button('Card To Hand', uiActions.cardToHand))

@@ -187,6 +187,12 @@ td.tile-Gear.dir-South::before, td.tile-Gear.dir-East::before, td.tile-Gear.dir-
 .card .priority {
 	color: grey;
 }
+#robot-board .selected, .card.selected {
+	font-weight: bold;
+}
+#robot-board li, #hand li {
+	line-height: 1.5;
+}
 
 #error {
 	background: yellow;

@@ -7,4 +7,24 @@ function ClearError() {
 }
 ClearError.type = 'ClearError'
 
-export {ClearError}
+function SelectCard(card : number) {
+	store.dispatch({
+		type: 'SelectCard',
+		payload: card,
+	})
+}
+SelectCard.type = 'SelectCard'
+
+function SelectSlot(slot : number) {
+	store.dispatch({
+		type: 'SelectSlot',
+		payload: slot,
+	})
+}
+SelectSlot.type = 'SelectSlot'
+
+export {
+	ClearError,
+	SelectSlot,
+	SelectCard,
+}
