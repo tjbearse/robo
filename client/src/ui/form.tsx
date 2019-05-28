@@ -4,54 +4,149 @@ import { connect } from 'react-redux'
 
 import {Dir} from '../types/coord'
 import Phases from '../types/phases'
+import { Player } from '../types/player'
 import * as uiActions from '../actions/playerTriggered'
+import HandAndBoard from './handAndBoard'
 
-function Form(props ) {
-	let {
-		gameInfo,
-		uiInfo,
 
-		cardToBoard,
-		cardToHand,
-		commitCards,
-		joinGame,
-		leaveGame,
-		newGame,
-		readyToSpawn,
-		setSpawnHeading,
-	} = props
-	let card = uiInfo.selected.card
-	let board = uiInfo.selected.board
-	let inside = getInnerContent()
-	return (
-		<div id="ControlForm">
-			{ gameInfo.phase != Phases.NoGame && <button onClick={leaveGame}>Leave Game</button>}
-			{ inside }
-		</div>
-	)
+interface FormProps {
+	phase: Phases,
+	me: Player,
 
-	// -- 
+	cardToBoard,
+	cardToHand,
+	commitCards,
+	joinGame,
+	leaveGame,
+	newGame,
+	readyToSpawn,
+	setSpawnHeading,
+}
+interface FormState {
+	selectedCard: number,
+	selectedBoard: number,
+}
 
-	function getInnerContent() {
-		switch(gameInfo.phase) {
-			case Phases.NoGame:
-				return (<JoinGame {...{newGame, joinGame}} />)
-			case Phases.Join:
-				return (<button onClick={readyToSpawn}>Ready To Spawn</button>)
-			case Phases.SpawnWait:
-				return (<div>'Waiting for others to spawn'</div>)
-			case Phases.Spawn:
-				return (<SetSpawnHeading {...{setSpawnHeading}}/>)
-			case Phases.PlayCards:
-				return (<PlayCards {...{card, board, cardToBoard, cardToHand, commitCards}}/>)
-			case Phases.PlayCardsWait:
-				return (<div>Waiting for others to finish</div>)
-			case Phases.Simulate:
-				return (<div>Running the turn</div>)
-			case Phases.GameOver:
-				return (<div>Game Over</div>)
+class Form extends React.Component {
+	props: FormProps
+	state: FormState
+	constructor(props: FormProps) {
+		super(props)
+		this.state = {
+			// TODO instead of unset, set board to the first empty slot
+			selectedCard: null,
+			selectedBoard: null,
 		}
-		return false
+	}
+
+	selectCard(i?: number) {
+		let {selectedCard, selectedBoard} = this.state
+		if (!this.props.me) {
+			return
+		}
+		let hand = this.props.me.hand
+
+		if (i === null) {
+			selectedCard = null
+		} else if (i < 0 || i >= hand.length) {
+			console.error('selectCard called with out of index value', i)
+			return
+		} else if (i === selectedCard) {
+			selectedCard = null
+		} else if (selectedBoard != null) {
+			this.props.cardToBoard(i, selectedBoard)
+			selectedCard = null
+			selectedBoard = null
+		} else {
+			selectedCard = i
+		}
+		this.setState({ selectedCard, selectedBoard })
+	}
+
+	selectBoard(i?: number) {
+		let {selectedCard, selectedBoard} = this.state
+		if (!this.props.me) {
+			return
+		}
+		const board = this.props.me.board
+
+		if (i == null) {
+			selectedBoard = null
+		/*
+			// FIXME these length checks aren't easy on objects
+		} else if (i < 0 || i >= board.length) {
+			console.error('selectBoard called with out of index value', i)
+			return
+		*/
+		} else if (board[i]) {
+			this.props.cardToHand(i)
+			selectedBoard = null
+		} else if (i === selectedBoard) {
+			selectedBoard = null
+		} else if (selectedCard !== null) {
+			this.props.cardToBoard(selectedCard, i)
+			selectedBoard = null
+			selectedCard = null
+		} else {
+			selectedBoard = i
+		}
+		this.setState({ selectedCard, selectedBoard })
+	}
+
+	render() {
+		let {
+			me,
+			phase,
+
+			cardToBoard,
+			cardToHand,
+			commitCards,
+			joinGame,
+			leaveGame,
+			newGame,
+			readyToSpawn,
+			setSpawnHeading,
+		} = this.props
+		let { selectedCard, selectedBoard } = this.state
+		let inside = getInnerContent()
+		let player = me
+
+		let selectCard = (i?: number)=>{ this.selectCard(i) }
+		let selectBoard = (i?: number)=>{ this.selectBoard(i) }
+		let showHand = player && phase != Phases.Join
+		return (
+			<div id="ControlForm">
+				{ phase != Phases.NoGame &&
+					<button onClick={leaveGame}>Leave Game</button>
+				}
+				{ inside }
+				{ showHand && <HandAndBoard {...{player, selectedCard, selectedBoard, selectCard, selectBoard}} /> }
+			</div>
+		)
+
+		// -- 
+
+		function getInnerContent() {
+			switch(phase) {
+				case Phases.NoGame:
+					return (<JoinGame {...{newGame, joinGame}} />)
+				case Phases.Join:
+					return (<button onClick={readyToSpawn}>Ready To Spawn</button>)
+				case Phases.SpawnWait:
+					return (<div>'Waiting for others to spawn'</div>)
+				case Phases.Spawn:
+					return (<SetSpawnHeading {...{setSpawnHeading}}/>)
+				case Phases.PlayCards:
+					return (<PlayCards {...{selectedCard, selectedBoard, cardToBoard, cardToHand, commitCards}}/>)
+				case Phases.PlayCardsWait:
+					return (<div>Waiting for others to finish</div>)
+				case Phases.Simulate:
+					return (<div>Running the turn</div>)
+				case Phases.GameOver:
+					return (<div>Game Over</div>)
+			}
+			return false
+		}
 	}
 }
 
@@ -108,14 +203,10 @@ class JoinGame extends HandleChange {
 	}
 }
 
-function PlayCards ({card, board, cardToBoard, cardToHand, commitCards}) {
-	let cToB = () => cardToBoard(card,board)
-	let cToH = () => cardToHand(board)
+function PlayCards ({selectedCard, selectedBoard, cardToBoard, cardToHand, commitCards}) {
 	let commit = ()=> commitCards()
 	return (
 		<div>
-			<button onClick={cToB}>Card To Board</button>
-			<button onClick={cToH}>Card To Hand</button>
 			<button onClick={commit}>Commit Cards</button>
 		</div>
 	)
@@ -154,7 +245,10 @@ class SetSpawnHeading extends HandleChange {
 	}
 }
 
-const mapStateToProps = (state /*, ownProps*/) => state
+const mapStateToProps = (state /*, ownProps*/) => ({
+	phase: state.gameInfo.phase,
+	me: state.players.players[state.players.me],
+})
 const mapDispatchToProps = uiActions
 export default connect(
   mapStateToProps,

@@ -20,20 +20,20 @@ function Layout (state) {
 		uiInfo,
 		gameInfo,
 	} = state
-	const selCard = uiInfo.selected.card,
-		  selBoard = uiInfo.selected.board
 	const myPlayer = players[me]
 
-	// TODO implement these components
 	return (
 		<div>
-			<div> GameId: { gameInfo.id } </div>
 			{ uiInfo.error? <Error clear={ClearError} error={uiInfo.error}/> : '' }
-			<HealthOverview {...{players}} />
-			<Board {...{board, players, uiInfo}} />
-			<Form/>
-			{ myPlayer && <HandAndBoard player={myPlayer} selCard={selCard} selBoard={selBoard} /> }
 			{ uiInfo.winner && <GameOver winner={uiInfo.winner} /> }
+			<div id="BoardAndControls">
+				<div id="Controls" >
+					<div> GameId: { gameInfo.id } </div>
+					<HealthOverview {...{players}} />
+					<Form/>
+				</div>
+				<Board {...{board, players, uiInfo}} />
+			</div>
 		</div>
 	)
 }

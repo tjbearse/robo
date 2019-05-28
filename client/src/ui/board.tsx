@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 
 import { Tile, TileType, Walls } from '../types/board'
 import { Robot, Player } from '../types/player'
+import range from './range'
 
 interface BoardProps {
 	board: Tile[][],
@@ -113,9 +114,4 @@ function Wall({walls}: {walls:Walls}) {
 		return null
 	}
 	return (<div className={'wall ' + wallClass}></div>)
-}
-
-// https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
-function range(size, startAt = 0) {
-    return [...Array(size).keys()].map(i => i + startAt);
 }

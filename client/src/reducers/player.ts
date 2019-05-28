@@ -42,6 +42,7 @@ const playersReducer = createReducer(
 			[notify.RobotMoved]: (p:Player, {NewConfig}) => { p.robot.config = NewConfig },
 			[notify.RobotFell]: (p:Player, { Target }) => { p.robot.config = Target },
 
+			// FIXME I think this is messing things up if it happens to you
 			[notify.RandomBoardFill]: (p:Player, {BoardSlots}) => {
 				BoardSlots.forEach((i) => { p.board[i] = newCardBack() })
 			},

@@ -59,7 +59,6 @@ class Queue {
 				}
 				this.types[t] = true;
 			}
-			console.log(m)
 			store.dispatch(this.messages.shift())
 		}
 		if (this.messages.length > 0) {

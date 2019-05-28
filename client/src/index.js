@@ -5,10 +5,6 @@ import drawCrappyVersion from './ui/ui'
 import queue from './queue'
 
 // This file is mostly temporary stuff while I work on data store
-
-console.log(store.getState())
-const unsubscribe = store.subscribe(() => console.log(store.getState()))
-
 window.onload = windowOnLoad
 
 // --
