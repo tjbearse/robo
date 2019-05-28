@@ -1,5 +1,8 @@
 FROM node as node-builder
 
+RUN apt-get update && apt-get install -y \
+inkscape && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir /home/node/robo
 WORKDIR /home/node/robo
 COPY client/package.json ./client/
