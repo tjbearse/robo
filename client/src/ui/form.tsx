@@ -164,11 +164,11 @@ class HandleChange extends React.Component {
 
 interface JoinGameProps{
 	newGame,
-	joinGame,
+	joinGame: (string, number)=>void,
 }
 interface JoinGameState{
 	name: string,
-	gameId: string|number,
+	gameId: string, // needs to be a number
 }
 class JoinGame extends HandleChange {
 	props: JoinGameProps
@@ -182,7 +182,8 @@ class JoinGame extends HandleChange {
 	}
 
 	joinGame() {
-		this.props.joinGame(this.state.name, this.state.gameId)
+		let gameId = Number(this.state.gameId)
+		this.props.joinGame(this.state.name, gameId)
 	}
 	newGame() {
 		this.props.newGame(this.state.name)
