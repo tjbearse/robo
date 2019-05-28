@@ -1,5 +1,3 @@
 robo
-client/src/img/intermediates/*
 client/node_modules
-client/package-lock.json
 client/dist

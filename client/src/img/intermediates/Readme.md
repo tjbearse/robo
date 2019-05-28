@@ -1,0 +1,1 @@
+This directory is committed to get around issues with creating these files reliably in different environments, e.g. docker / arm. If a solution is found to those issues then this directory can be readded to the docker and git ignores.
