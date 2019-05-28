@@ -102,14 +102,14 @@ func attemptMove(c comm.ExtendedCommClient, g *game.Game, loc coords.Coord, p *g
 		return false
 	}
 	target := coords.Configuration{loc, r.Configuration.Heading}
-	if !g.Board.IsInbounds(loc) {
-		executeRobotFall(c, g, p, target, reason)
-		return true
-	}
 	// FIXME ignored error
 	passable, _ := g.Board.IsPassable(r.Configuration.Location, loc) 
 	if !passable {
 		return false
+	}
+	if !g.Board.IsInbounds(loc) {
+		executeRobotFall(c, g, p, target, reason)
+		return true
 	}
 
 	tile, _ := g.Board.GetTile(loc)
