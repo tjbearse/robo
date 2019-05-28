@@ -3,16 +3,19 @@ import ReactDOM from 'react-dom'
 
 import { Player } from '../types/player'
 
-interface PlayerMap {
-	[name:string]: Player
+interface HealthOverviewProps {
+	players: {[name:string]: Player},
+	colorMap: {[name:string]: number},
 }
-
-export default function HealthOverview({ players } : { players: PlayerMap }) {
+export default function HealthOverview({ players, colorMap } : HealthOverviewProps) {
 	let items = Object.values(players).map((player) => {
 		let { name, hand, board, robot: { lives, damage } } = player
-		let text = `${name}: lives: ${lives} damage: ${damage}`
 		return (
-			<li key="player-{name}">{text}</li>
+			<li key="player-{name}">
+				{`${name}:`}
+				<span className={`robot robot-${colorMap[name]}`} />
+				{`lives: ${lives} damage: ${damage}`}
+			</li>
 		)
 	})
 	return (

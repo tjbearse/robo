@@ -24,7 +24,7 @@ export function newPlayer(name:string) : Player {
 function newRobot() : Robot {
 	return {
 		damage: 0,
-		lives: 0,
+		lives: 3,
 		config: null,
 	}
 }

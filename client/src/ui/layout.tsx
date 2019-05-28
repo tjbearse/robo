@@ -29,7 +29,7 @@ function Layout (state) {
 			<div id="BoardAndControls">
 				<div id="Controls" >
 					<div> GameId: { gameInfo.id } </div>
-					<HealthOverview {...{players}} />
+					<HealthOverview {...{colorMap: uiInfo.colors.map, players}} />
 					<Form/>
 				</div>
 				<Board {...{board, players, uiInfo}} />

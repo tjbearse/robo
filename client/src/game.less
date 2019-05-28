@@ -42,6 +42,14 @@ html * {
 		#Controls {
 			flex: 1;
 		}
+		#overview {
+			span.robot {
+				width: 40px;
+				height: 40px;
+				display: inline-block;
+				vertical-align: middle;
+			}
+		}
 		#playArea {
 			flex: 1;
 			margin: 8px;
@@ -265,53 +273,6 @@ html * {
 					position: absolute;
 					top: 0;
 					left: 0;
-					background-repeat: no-repeat;
-					background-size: contain;
-					background-image: url(./img/intermediates/robot0.png);
-
-					// directions
-					&.dir-East {
-						.East()
-					}
-					&.dir-South {
-						.South()
-					}
-					&.dir-West {
-						.West()
-					}
-
-					// sprites
-					&.robot-0 {
-						background-image: url(./img/intermediates/robot0.png)
-					}
-					&.robot-1 {
-						background-image: url(./img/intermediates/robot1.png)
-					}
-					&.robot-2 {
-						background-image: url(./img/intermediates/robot2.png)
-					}
-					&.robot-3 {
-						background-image: url(./img/intermediates/robot3.png)
-					}
-					&.robot-4 {
-						background-image: url(./img/intermediates/robot4.png)
-					}
-					&.robot-5 {
-						background-image: url(./img/intermediates/robot5.png)
-					}
-					&.robot-6 {
-						background-image: url(./img/intermediates/robot6.png)
-					}
-					&.robot-7 {
-						background-image: url(./img/intermediates/robot7.png)
-					}
-
-					&.dir-indeterminent {
-						transform: rotate(180deg);
-						animation-name: spin;
-						animation-duration: 4s;
-						animation-iteration-count: infinite;
-					}
 				}
 			} // End td.Tile
 
@@ -336,6 +297,55 @@ html * {
 		padding: 4px;
 		border-radius: 8px;
 		z-index: 30;
+	}
+}
+.robot {
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-image: url(./img/intermediates/robot0.png);
+
+	// directions
+	&.dir-East {
+		.East()
+	}
+	&.dir-South {
+		.South()
+	}
+	&.dir-West {
+		.West()
+	}
+
+	// sprites
+	&.robot-0 {
+		background-image: url(./img/intermediates/robot0.png)
+	}
+	&.robot-1 {
+		background-image: url(./img/intermediates/robot1.png)
+	}
+	&.robot-2 {
+		background-image: url(./img/intermediates/robot2.png)
+	}
+	&.robot-3 {
+		background-image: url(./img/intermediates/robot3.png)
+	}
+	&.robot-4 {
+		background-image: url(./img/intermediates/robot4.png)
+	}
+	&.robot-5 {
+		background-image: url(./img/intermediates/robot5.png)
+	}
+	&.robot-6 {
+		background-image: url(./img/intermediates/robot6.png)
+	}
+	&.robot-7 {
+		background-image: url(./img/intermediates/robot7.png)
+	}
+
+	&.dir-indeterminent {
+		transform: rotate(180deg);
+		animation-name: spin;
+		animation-duration: 4s;
+		animation-iteration-count: infinite;
 	}
 }
 
