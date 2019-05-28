@@ -16,7 +16,7 @@ const gameInfoReducer = createReducer(initialState, {
     [notify.StartSpawn]: (state, action) => { state.phase = Phases.SpawnWait },
     [notify.PromptForSpawn]: (state, action) => { state.phase = Phases.Spawn },
     [notify.PromptWithHand]: (state, action) => { state.phase = Phases.PlayCards },
-	[outgoing.CommitCards.type]: (state, action) => { state.phase = Phases.PlayCardsWait },
+	[outgoing.commitCards.type]: (state, action) => { state.phase = Phases.PlayCardsWait },
 	[notify.RevealCard]: (state, action) => { state.phase = Phases.Simulate },
 	[notify.PlayerFinished]: (state, action) => { state.phase = Phases.GameOver },
 })

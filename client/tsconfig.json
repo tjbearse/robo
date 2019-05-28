@@ -1,9 +1,12 @@
 {
 	"compilerOptions": {
 		"outDir": "./dist/",
+		"target": "es6",
 		"module": "es6",
 		"lib": ["dom", "es2018"],
 		"sourceMap": true,
-		"allowJs": true
+		"allowJs": true,
+		"jsx": "react",
+		"allowSyntheticDefaultImports": true
 	}
 }

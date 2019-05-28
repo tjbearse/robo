@@ -1,15 +1,15 @@
-import {conn} from './websocket'
+/*
 import {Dir} from './types/coord'
 import {
-	CardToBoard,
-	CardToHand,
-	CommitCards,
-	GetGames,
-	JoinGame,
-	LeaveGame,
-	NewGame,
-	ReadyToSpawn,
-	SetSpawnHeading,
+	cardToBoard,
+	cardToHand,
+	commitCards,
+	getGames,
+	joinGame,
+	leaveGame,
+	newGame,
+	readyToSpawn,
+	setSpawnHeading,
 } from './actions/playerTriggered'
 
 export function newGame() {
@@ -66,3 +66,4 @@ function getFormInt(id:string) : number {
 	let elm : HTMLInputElement = document.getElementById(id) as HTMLInputElement
 	return +elm.value
 }
+*/

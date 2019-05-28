@@ -2,15 +2,15 @@ import {conn} from '../websocket'
 import {Dir} from '../types/coord'
 import store from '../store'
 
-SetSpawnHeading.type = 'SetSpawnHeading'
-NewGame.type = 'NewGame'
-GetGames.type = 'GetGames'
-CardToBoard.type = 'CardToBoard'
-CardToHand.type = 'CardToHand'
-CommitCards.type = 'CommitCards'
-JoinGame.type = 'JoinGame'
-LeaveGame.type = 'LeaveGame'
-ReadyToSpawn.type = 'ReadyToSpawn'
+setSpawnHeading.type = 'SetSpawnHeading'
+newGame.type = 'NewGame'
+getGames.type = 'GetGames'
+cardToBoard.type = 'CardToBoard'
+cardToHand.type = 'CardToHand'
+commitCards.type = 'CommitCards'
+joinGame.type = 'JoinGame'
+leaveGame.type = 'LeaveGame'
+readyToSpawn.type = 'ReadyToSpawn'
 
 interface action {
 	type: string
@@ -18,36 +18,36 @@ interface action {
 }
 
 export {
-	CardToBoard,
-	CardToHand,
-	CommitCards,
-	GetGames,
-	JoinGame,
-	LeaveGame,
-	NewGame,
-	ReadyToSpawn,
-	SetSpawnHeading,
+	cardToBoard,
+	cardToHand,
+	commitCards,
+	getGames,
+	joinGame,
+	leaveGame,
+	newGame,
+	readyToSpawn,
+	setSpawnHeading,
 }
 
-function SetSpawnHeading(dir : Dir) {
+function setSpawnHeading(dir : Dir) {
 	let e = {
 		Dir: dir
 	}
 	return sendEvent('SetSpawnHeading', e)
 }
 
-function NewGame(PlayerName : string) {
+function newGame(PlayerName : string) {
 	let e = {
 		PlayerName
 	}
 	return sendEvent('NewGame', e)
 }
 
-function GetGames() {
+function getGames() {
 	return sendEvent('GetGames', {})
 }
 
-function CardToBoard(HandOffset:number, BoardSlot:number) {
+function cardToBoard(HandOffset:number, BoardSlot:number) {
 	let e = {
 		HandOffset,
 		BoardSlot,
@@ -55,18 +55,18 @@ function CardToBoard(HandOffset:number, BoardSlot:number) {
 	return sendEvent('CardToBoard', e)
 }
 
-function CardToHand(BoardSlot:number) {
+function cardToHand(BoardSlot:number) {
 	let e = {
 		BoardSlot,
 	}
 	return sendEvent('CardToHand', e)
 }
 
-function CommitCards() {
+function commitCards() {
 	return sendEvent('CommitCards', {})
 }
 
-function JoinGame(PlayerName:string, Game:number) {
+function joinGame(PlayerName:string, Game:number) {
 	let e = {
 		PlayerName,
 		Game,
@@ -74,18 +74,18 @@ function JoinGame(PlayerName:string, Game:number) {
 	return sendEvent('JoinGame', e)
 }
 
-function LeaveGame() {
+function leaveGame() {
 	return sendEvent('LeaveGame', {})
 }
 
-function ReadyToSpawn() {
+function readyToSpawn() {
 	return sendEvent('ReadyToSpawn', {})
 }
 
 function sendEvent(Type, Msg) {
 	conn.send(JSON.stringify({ Type, Msg }))
-	store.dispatch({
+	return {
 		type: Type,
 		payload: Msg
-	})
+	}
 }

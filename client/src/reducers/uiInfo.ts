@@ -1,7 +1,7 @@
 import { createReducer } from 'redux-starter-kit'
 import notify from '../actions/notify'
 import {SelectCard, SelectSlot, ClearError} from '../actions/playerActions'
-import {CardToBoard} from '../actions/playerTriggered'
+import {cardToBoard} from '../actions/playerTriggered'
 
 /*
   UI related
@@ -33,7 +33,7 @@ const uiInfoReducer = createReducer(initialState, {
 	[notify.PromptWithHand]: (state, action) => { state.selected = initialState.selected },
 	[SelectCard.type]: (state, action) => { state.selected.card = action.payload },
 	[SelectSlot.type]: (state, action) => { state.selected.board = action.payload },
-	[CardToBoard.type]: (state,action) => { state.selected.board++ },
+	[cardToBoard.type]: (state,action) => { state.selected.board++ },
 })
 
 export default uiInfoReducer

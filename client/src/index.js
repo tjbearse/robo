@@ -1,7 +1,7 @@
 import store from "./store"
 import './game.less'
 import {conn, init} from './websocket'
-import drawCrappyVersion from './ui'
+import drawCrappyVersion from './ui/ui'
 import queue from './queue'
 
 // This file is mostly temporary stuff while I work on data store
@@ -18,8 +18,8 @@ function windowOnLoad() {
 	conn.onmessage = handleMessage
 	conn.onclose = handleClose
 
-	drawCrappyVersion(store.getState())
-	const unsubscribeDraw = store.subscribe(() => drawCrappyVersion(store.getState()))
+	// drawCrappyVersion(store.getState())
+	// const unsubscribeDraw = store.subscribe(() => drawCrappyVersion(store.getState()))
 };
 
 function handleMessage(evt) {
