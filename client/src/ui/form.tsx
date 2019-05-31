@@ -167,7 +167,7 @@ class JoinGame extends HandleChange {
 	constructor(props: JoinGameProps) {
 		super(props)
 		this.state = {
-			name: 'TJ',
+			name: '',
 			gameId: '',
 		}
 	}
