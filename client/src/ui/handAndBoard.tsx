@@ -29,7 +29,7 @@ interface HandProps {
 	select: (number)=>void,
 	deselect: ()=>void,
 }
-function Hand({hand, selectedCard, select}) {
+export function Hand({hand, selectedCard, select}) {
 	return (
 		<div id="hand">Hand
 			<div id="handArea" >
@@ -52,7 +52,7 @@ interface BoardProps {
 	selectedBoard: number,
 	select: (i?:number)=>void,
 }
-function Board({board, selectedBoard, select}: BoardProps) {
+export function Board({board, selectedBoard, select}: BoardProps) {
 	return (
 		<div id="robotBoard">Board:
 			<div id="robotBoardArea">

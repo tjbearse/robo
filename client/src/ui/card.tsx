@@ -5,7 +5,7 @@ import { Card as CardType, Command, commandToText } from '../types/card'
 
 interface CardProps {
 	card: CardType,
-	selected: boolean,
+	selected?: boolean,
 	select?: ()=>void,
 }
 export function Card(props: CardProps) {

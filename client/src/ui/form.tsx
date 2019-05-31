@@ -9,6 +9,7 @@ import * as uiActions from '../actions/playerTriggered'
 import HandAndBoard from './handAndBoard'
 import { Help, HelpHint } from './help'
 import HandleChange from './handleChange'
+import MoveDisplay from './moveDisplay'
 
 
 interface FormProps {
@@ -144,7 +145,10 @@ class Form extends React.Component {
 				case Phases.PlayCardsWait:
 					return (<div>Waiting for others to finish</div>)
 				case Phases.Simulate:
-					return (<div>Running the turn</div>)
+					return (<div>
+						<span>Running the turn...</span>
+						<MoveDisplay />
+					</div>)
 				case Phases.GameOver:
 					return (<div>Game Over</div>)
 			}
