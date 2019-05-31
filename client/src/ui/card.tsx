@@ -8,9 +8,13 @@ interface CardProps {
 	selected: boolean,
 	select?: ()=>void,
 }
-export function Card({card, selected, select}: CardProps) {
-	let className = `card command-${Command[card.Command]}`
+export function Card(props: CardProps) {
+	let {card, selected, select} = props
+	if (card.Command === undefined) {
+		return <CardBack {...props} />
+	}
 	let onClick = ()=>{ select && select() }
+	let className = `card command-${Command[card.Command]}`
 	if (selected) {
 		className += ' selected'
 	}
@@ -40,9 +44,13 @@ export function CardSlot({selected, select, slot}) {
 	)
 }
 
-export function CardBack() {
+export function CardBack({card, selected, select}: CardProps) {
+	let onClick = ()=>{ select && select() }
+	let className = 'card card-back'
+	if (selected) {
+		className += ' selected'
+	}
 	return (
-		<div className="card back" >
-		</div>
+		<div {...{className, onClick}} ></div>
 	)
 }
