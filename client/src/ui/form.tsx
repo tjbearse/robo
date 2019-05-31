@@ -7,6 +7,8 @@ import Phases from '../types/phases'
 import { Player } from '../types/player'
 import * as uiActions from '../actions/playerTriggered'
 import HandAndBoard from './handAndBoard'
+import { Help, HelpHint } from './help'
+import HandleChange from './handleChange'
 
 
 interface FormProps {
@@ -120,6 +122,7 @@ class Form extends React.Component {
 					<button onClick={leaveGame}>Leave Game</button>
 				}
 				{ inside }
+				{ phase == Phases.NoGame? <Help/> : <HelpHint /> }
 				{ showHand && <HandAndBoard {...{player, selectedCard, selectedBoard, selectCard, selectBoard}} /> }
 			</div>
 		)
@@ -147,18 +150,6 @@ class Form extends React.Component {
 			}
 			return false
 		}
-	}
-}
-
-class HandleChange extends React.Component {
-	constructor(props) {
-		super(props)
-		this.handleChange = this.handleChange.bind(this)
-	}
-	handleChange(event) {
-		const target = event.target.name
-		const value = event.target.value
-		this.setState({[target]: value})
 	}
 }
 
