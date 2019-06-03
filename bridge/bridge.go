@@ -79,7 +79,15 @@ func (c *Bridge) ActOnMessage(renv websockets.Envelope, send func(websockets.Env
 		comm.SendError(err)
 		return
 	}
-	err = event.Exec(comm)
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Println("Recovered in while acting on a message", r)
+				comm.SendError(errors.New("there was an unexpected error. Your game might be broken. Please let TJ know!"));
+			}
+		}()
+		err = event.Exec(comm)
+	}();
 	if err != nil {
 		comm.SendError(err)
 	}

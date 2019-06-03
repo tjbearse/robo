@@ -141,14 +141,14 @@ func (board *Board) wallBetween(a coords.Coord, b coords.Coord) bool {
 	if offset.X != 0 {
 		// check in W walls
 		x := max(a.X, b.X)
-		if x > len(board.wwalls) || a.Y > len(board.wwalls[x]) {
+		if x >= len(board.wwalls) || a.Y >= len(board.wwalls[x]) {
 			return false
 		}
 		return board.wwalls[x][a.Y]
 	} else {
 		// check in N walls
 		y := max(a.Y, b.Y)
-		if a.X > len(board.nwalls) || y > len(board.nwalls[a.X]) {
+		if a.X >= len(board.nwalls) || y >= len(board.nwalls[a.X]) {
 			return false
 		}
 		return board.nwalls[a.X][y]
