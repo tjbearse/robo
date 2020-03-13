@@ -1,0 +1,23 @@
+len width
+<tiles>
+
+#key
+.:floor
+R:repair
+U:upgrade
+X:pit
+<>v^:conveyor
+double for express
+g:gear(cw)
+G:gear(ccw)
+P<nesw>:pusher
+L<nesw>:laser
+S<num>: spawn
+F<nesw>: flag
+
+|
+L
+T
+J
+_
+-

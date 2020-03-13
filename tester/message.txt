@@ -1,0 +1,13 @@
+{ "Type": "JoinGame", "Msg": {"Name": "TJ"}}
+{ "Type": "ReadyToSpawn", "Msg": {}}
+{ "Type": "CardToBoard", "Msg": { "HandOffset": 0, "BoardSlot": 0 }}
+{ "Type": "CardToBoard", "Msg": { "HandOffset": 0, "BoardSlot": 1 }}
+{ "Type": "CardToBoard", "Msg": { "HandOffset": 0, "BoardSlot": 2 }}
+{ "Type": "CardToBoard", "Msg": { "HandOffset": 0, "BoardSlot": 3 }}
+{ "Type": "CardToBoard", "Msg": { "HandOffset": 0, "BoardSlot": 4 }}
+{ "Type": "CardToHand", "Msg": { "BoardSlot": 0 }}
+{ "Type": "CardToHand", "Msg": { "BoardSlot": 1 }}
+{ "Type": "CardToBoard", "Msg": { "HandOffset": 0, "BoardSlot": 0 }}
+{ "Type": "CardToBoard", "Msg": { "HandOffset": 0, "BoardSlot": 1 }}
+{ "Type": "CardToBoard", "Msg": { "HandOffset": 0, "BoardSlot": 1 }}
+{ "Type": "CommitCards", "Msg": { "HandOffset": 0, "BoardSlot": 1 }}
