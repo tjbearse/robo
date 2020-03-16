@@ -13,9 +13,7 @@ function windowOnLoad() {
 	init()
 	conn.onmessage = handleMessage
 	conn.onclose = handleClose
-
-	// drawCrappyVersion(store.getState())
-	// const unsubscribeDraw = store.subscribe(() => drawCrappyVersion(store.getState()))
+	window.debug_store = store;
 };
 
 function handleMessage(evt) {

@@ -3,6 +3,7 @@ import notify from '../actions/notify'
 import { Tile, Board, Walls } from '../types/board'
 import { Coord } from '../types/coord'
 
+// TODO separate walls into dedicated arrays in state
 const boardReducer = createReducer([], {
     [notify.Board]: (state, action) => {
 		let board : Tile[][] = []

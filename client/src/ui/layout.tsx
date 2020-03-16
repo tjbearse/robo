@@ -7,7 +7,7 @@ import { ClearError } from '../actions/playerActions'
 import Form from './form'
 import HealthOverview from './HealthOverview'
 import Error from './error'
-import Board from './board'
+import Board from './canvasBoard'
 import HandAndBoard from './handAndBoard'
 import GameOver from './gameOver'
 
