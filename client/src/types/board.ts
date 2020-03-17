@@ -38,4 +38,6 @@ export interface Tile {
 
 export interface Board {
 	tiles: Tile[][]
+	nWalls: boolean[][],
+	wWalls: boolean[][],
 }

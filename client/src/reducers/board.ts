@@ -3,14 +3,27 @@ import notify from '../actions/notify'
 import { Tile, Board, Walls } from '../types/board'
 import { Coord } from '../types/coord'
 
-// TODO separate walls into dedicated arrays in state
-const boardReducer = createReducer([], {
+function DeepCopy<T>(a: T) : T {
+	return JSON.parse(JSON.stringify(a));
+}
+
+const defaultBoard : Board = {
+	tiles: [],
+	nWalls: [],
+	wWalls: [],
+};
+
+const boardReducer = createReducer(defaultBoard, {
     [notify.Board]: (state, action) => {
-		let board : Tile[][] = []
+		let board : Board = DeepCopy(defaultBoard);
 		let { Tiles, Nwalls, Wwalls, FlagOrder} = action.payload.Board
 
+		board.nWalls = Nwalls;
+		board.wWalls = Wwalls;
+
+		// TODO remove walls from tile state
 		for (let x=0; x < Tiles.length; x++ ) {
-			board.push([])
+			board.tiles.push([])
 			for (let y=0; y < Tiles[x].length; y++) {
 				let t = Tiles[x][y]
 				let nwall = Nwalls[x][y]
@@ -18,18 +31,18 @@ const boardReducer = createReducer([], {
 				let wwall = Wwalls[x][y]
 				let ewall = Wwalls[x+1][y]
 				let tile = getTile(t, nwall, ewall, swall, wwall)
-				board[x].push(tile)
+				board.tiles[x].push(tile)
 			}
 		}
 		for (let i=0; i < FlagOrder.length; i++) {
 			let coord : Coord = FlagOrder[i]
-			board[coord.X][coord.Y].num = i
+			board.tiles[coord.X][coord.Y].num = i
 		}
 
 		return board
 	},
-	[notify.Welcome]: (state, action) => [],
-	[notify.Goodbye]: (state, action) => [],
+	[notify.Welcome]: (state, action) => defaultBoard,
+	[notify.Goodbye]: (state, action) => defaultBoard,
 })
 
 export default boardReducer
