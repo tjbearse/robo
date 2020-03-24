@@ -24,6 +24,19 @@ export class Grid {
 		this.height = hPx;
 	}
 
+	getRow(yi:number) : number
+	{
+		let h = this.tileDim;
+		return this.marginY + yi * h;
+	}
+
+	getCol(xi:number) : number
+	{
+		let w = this.tileDim;
+		let h = this.tileDim;
+		return this.marginX + xi * w;
+	}
+
 	getItemPx(xi:number, yi:number)
 		: {x: number, y: number, width: number, height: number}
 	{

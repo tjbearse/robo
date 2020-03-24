@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Stage, Layer, Group, Rect, Text} from 'react-konva';
+import { Stage, Layer, Group, Rect, Text, Line} from 'react-konva';
 import useImage from 'use-image';
 
 import { Tile, Board, Directions, TileType, Walls } from '../types/board'
@@ -20,21 +20,21 @@ interface BoardProps {
 
 let boardColors = {
 	offGrid: '#222',
+	gridLine: '#888',
 	wall: '#d4aa00',
 };
 
 enum DirRotation {
 	North = 0,
-	East = 1,
-	South = 2,
-	West = 3,
+	East = 90,
+	South = 180,
+	West = 270,
 }
 
 export default function Board({board, players, uiInfo} : BoardProps ) {
 	if (!board.tiles || board.tiles.length < 1) return null;
 	const grid = new Grid(520, 640, board.tiles.length, board.tiles[0].length);
 	const { colors } = uiInfo
-	// TODO walls
 	// TODO separate draw for movable items like flags, spawn markers
 	// TODO laser fire
     return (
@@ -42,7 +42,6 @@ export default function Board({board, players, uiInfo} : BoardProps ) {
 		<Stage width={600} height={640}>
 			<Layer>
 				<Map {...{grid, board}} />
-				<GridLines grid={grid} />
 			</Layer>
 			<Layer>
 				{
@@ -61,8 +60,29 @@ export default function Board({board, players, uiInfo} : BoardProps ) {
 }
 
 
+function GridLine({points} : {points : number[]}) {
+	let stroke = boardColors.gridLine;
+	let strokeWidth = 1;
+	return <Line {...{points, stroke, strokeWidth}} />
+}
 function GridLines({grid} : {grid : Grid}) {
-	return null;
+	{
+		let y0 = 0, yn = grid.fullHeight;
+		let x0 = 0, xn = grid.fullWidth;
+		let cols = range(grid.nItemX).map(i => {
+			let x = grid.getCol(i);
+			return <GridLine key = {"col" + i} points={[x, y0, x, yn]} />
+		});
+		let rows = range(grid.nItemY).map(i => {
+			let y = grid.getRow(i);
+			return <GridLine key={"row" + i} points={[x0, y, xn, y]} />
+		});
+
+		return <Group>
+			{ cols }
+			{ rows }
+		</Group>
+	}
 }
 
 function Map({grid, board} : {grid : Grid, board : Board}) {
@@ -86,6 +106,7 @@ function Map({grid, board} : {grid : Grid, board : Board}) {
 					);
 				}))
 			}
+			<GridLines grid={grid} />
 			{
 				board.nWalls.map((row, xi) => row
 					.map((wall, yi) => {
@@ -141,7 +162,7 @@ function Tile({x,y,width,height,tile}) {
 		// TODO indeterminent animation
 		rotation = 0;
 	} else {
-		rotation = 90 * +DirRotation[tile.dir];
+		rotation = +DirRotation[tile.dir];
 	}
 	let scaleX = 1;
 	if (tile.type === TileType.Gear && tile.dir !== Directions.North) {
@@ -170,7 +191,7 @@ function Robot({grid, robot, colorNum}
 	if (!image) return null;
 
 	const {x, y, width, height} = grid.getItemPx(robot.config.Location.X, robot.config.Location.Y);
-	const rotation = 0; // TODO
+	const rotation = +DirRotation[robot.config.Heading];
 	return (
 		<UrlImage {...{
 				image,
